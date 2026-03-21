@@ -1,107 +1,195 @@
 # Research Publication Management System
 
-A full-stack web application designed for researchers, librarians, and administrators to efficiently manage, track, and analyze research publications and author metrics. 
-
-## 🚀 Features
-
-### **Frontend (Next.js + Tailwind CSS)**
-- **Modern User Interface**: Designed with the latest Tailwind CSS utilities, featuring beautiful gradient cards, frosted-glass surfaces, and smooth hover animations.
-- **Dark/Light Mode**: Full system-level and manual theme toggling powered by `next-themes`.
-- **Advanced Analytics Dashboard**: Visualizes research impact using Recharts:
-  - Publications per year (Bar Chart)
-  - Citations over time (Line Chart)
-  - Top Authors by citation count (Bar Chart)
-  - Most Cited Papers (Bar Chart)
-- **Responsive Navigation**: Clean, accessible sidebar routing featuring `lucide-react` icons.
-- **Loading States**: Skeleton loading animations provide a premium feel during data fetches.
-
-### **Backend (Node.js + Express.js)**
-- **Secure Authentication**: Role-based access control (Admin, Researcher) secured natively via robust JWT tokens.
-- **Publication Management**: Full CRUD capabilities for research papers, including metadata tracking (DOI, Abstract, Journal/Conference IDs, PDF URLs).
-- **Author Profiles**: Dedicated registry tracking ORCID IDs, dynamic university/department affiliations, and specific research interests.
-- **Citation Tracking**: Intricate cross-referencing algorithms to track which papers cite each other, preventing duplicate circular dependencies.
-- **Impact Metrics Calculation**: On-the-fly computational endpoints calculating:
-  - **h-index**: The largest number *h* such that *h* publications have at least *h* citations.
-  - **i10-index**: The number of publications with at least 10 citations.
-  - **Total Citation Volume**.
-  - **Self-Citation Detection**.
-
-### **Database (PostgreSQL)**
-- Relational data integrity enforced through strict `FOREIGN KEY` constraints and cascading deletes.
-- Pre-configured `database/seed.sql` script available to instantly populate the platform with iconic Computer Science and AI researchers (Hinton, LeCun, Bengio) and historically significant deep learning papers.
+A full-stack, role-based application designed to meticulously track, manage, and analyze research publications, authors, citations, and funding grants. Built with **Next.js**, **Express.js**, and **PostgreSQL**.
 
 ---
 
-## 🛠️ Tech Stack
+## 🌟 Features & Functionality
 
-**Frontend:**
-- [Next.js](https://nextjs.org/) (React Framework)
-- [Tailwind CSS](https://tailwindcss.com/) (Styling & Gradients)
-- [Recharts](https://recharts.org/) (Data Visualization)
-- [Lucide React](https://lucide.dev/) (SVG Icons)
-- [Next-Themes](https://github.com/pacocoursey/next-themes) (Dark Mode functionality)
-- Axios (API fetching)
+This platform is divided into several core modules that help institutions organize their research output:
 
-**Backend:**
-- [Node.js](https://nodejs.org/) & [Express](https://expressjs.com/)
-- [PostgreSQL](https://www.postgresql.org/) (Relational DB)
-- `pg` (Node Postgres Client)
-- `jsonwebtoken` (Auth)
-- `bcryptjs` (Password Hashing)
+- **Dashboard**: A birds-eye view of total publications, active researchers, total citations, and recent activity.
+- **Publications Management**: A complete CRUD interface for academic papers, tracking DOI, journals, and keywords.
+- **Authors & Collaborations**: Manage researcher profiles. Features a powerful **Recommendation Engine** that suggests potential collaborators based on mutual co-authors, and tracks **Self-Citation Patterns** to ensure metric integrity.
+- **Funding & Grants**: Allows administrators to register funding agencies (e.g., NSF, Google Research) and assign financial grants to specific papers. Includes a visual chart for funding distribution.
+- **Analytics Dashboard**: Computes complex academic metrics on-the-fly, including **h-index**, **i10-index**, and total citation breakdowns via raw SQL queries.
+- **Explore (OpenAlex Integration)**: Search for external papers and global publications using the public [OpenAlex API](https://openalex.org/).
 
----
+### 🛡️ Role-Based Access Control (RBAC)
 
-## ⚙️ Getting Started
+The system enforces strict UI and Backend API restrictions based on three user tiers:
 
-### 1. Database Setup
-Ensure PostgreSQL is installed and running locally. Create a database (default expected name: `research_db`).
-
-Execute the initial schema definitions:
-```bash
-psql -U postgres -d your_db_name -f database/schema.sql
-```
-
-*(Optional)* Run the seed script to populate the database with demo AI/CS data:
-```bash
-psql -U postgres -d your_db_name -f database/seed.sql
-```
-
-### 2. Backend Configuration
-Navigate to the `/backend` directory:
-```bash
-cd backend
-npm install
-```
-Configure your `.env` variables (create a `.env` file in `/backend`):
-```env
-PORT=5000
-DATABASE_URL=postgres://postgres:yourpassword@localhost:5432/your_db_name
-JWT_SECRET=your_super_secret_jwt_key
-```
-Start the development server:
-```bash
-npm run dev
-```
-
-### 3. Frontend Configuration
-Navigate to the `/frontend` directory:
-```bash
-cd frontend
-npm install
-```
-Configure your `.env.local` variables:
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-```
-Start the Next.js development server:
-```bash
-npm run dev
-```
+| Role | Permissions |
+| :--- | :--- |
+| **Administrator** | **Full Access**. Can add, edit, and forcefully delete publications, authors, citations, and funding agencies. |
+| **Librarian** | **Management Access**. Can add and edit authors, publications, and funding grants, but generally cannot perform destructive deletes. |
+| **Researcher** | **Read-Only Access**. Can explore publications, view analytics, and find collaboration recommendations. All creation/modification forms are hidden in the UI and blocked at the API level (`403 Forbidden`). |
 
 ---
 
-## 📖 Usage
-Navigate to `http://localhost:3000` in your browser. 
-If you used the `seed.sql` script, you can log in immediately using the demo credentials:
-- **Email**: `admin@example.com`
-- **Password**: `password123` *(default bcrypt hash)*
+## 🏗️ Architecture & Data Flow
+
+- **Frontend (`/frontend`)**: Built with **Next.js** and **Tailwind CSS**. A responsive, animated UI (`MobileMenuContext`) that consumes the backend REST API via Axios. Protected routes check for JWT tokens. 
+- **Backend (`/backend`)**: An **Express.js** API. Uses `pg` to connect to the database. Middleware (`authMiddleware`) intercepts requests to verify JWTs and enforce `authorizeRoles`.
+- **Database (`/database`)**: A deeply relational **PostgreSQL** schema. Uses Foreign Keys, `ON DELETE CASCADE` rules, and Common Table Expressions (CTEs) for advanced analytics.
+
+---
+
+## 🚀 Getting Started Step-by-Step
+
+Follow these instructions to get a local copy up and running on your machine.
+
+### 1. Prerequisites
+- **Node.js** (v18+ recommended)
+- **PostgreSQL** (v14+ recommended)
+- Git
+
+### 2. Database Setup
+1. Install [PostgreSQL](https://www.postgresql.org/download/) and ensure the command-line tool `psql` is in your system PATH.
+2. Open your terminal and log into Postgres:
+   ```bash
+   psql -U postgres
+   ```
+3. Create the empty database:
+   ```sql
+   CREATE DATABASE research_db;
+   \q
+   ```
+4. Navigate to the `database` folder in this project and run the schema and seed scripts to populate the tables with 50+ relational test records:
+   ```bash
+   cd database
+   psql -U postgres -d research_db -f schema.sql
+   psql -U postgres -d research_db -f seed.sql
+   ```
+   *(Enter your postgres password when prompted).*
+
+### 3. Backend Setup
+1. Open a new terminal and navigate to the backend directory:
+   ```bash
+   cd backend
+   npm install
+   ```
+2. Create a `.env` file inside the `backend` folder and configure your variables:
+   ```env
+   PORT=5000
+   DB_USER=postgres
+   DB_PASSWORD=your_postgres_password
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=research_db
+   JWT_SECRET=your_super_secret_jwt_key
+   ```
+3. Start the backend server:
+   ```bash
+   npm run dev
+   # or `node server.js`
+   ```
+
+### 4. Frontend Setup
+1. Open a new terminal and navigate to the frontend directory:
+   ```bash
+   cd frontend
+   npm install
+   ```
+2. Create a `.env.local` file inside the `frontend` folder:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:5000/api
+   ```
+3. Start the Next.js development server:
+   ```bash
+   npm run dev
+   ```
+
+### 5. Login to the App
+Open `http://localhost:3000` in your browser. You can log in using the mock data generated by `seed.sql`:
+
+- **Admin Account**: `admin@example.com` (Password: `password123`)
+- **Researcher Account**: `researcher@example.com` (Password: `password123`)
+
+---
+
+## 📂 Project Structure
+
+```text
+├── backend/                  # Express API
+│   ├── controllers/          # Business logic & algorithms (Analytics, Recommendations)
+│   ├── middleware/           # JWT & RBAC interceptors
+│   ├── models/               # Raw PostgreSQL Queries
+│   ├── routes/               # Express endpoints router
+│   └── server.js             # API Entry point
+├── frontend/                 # Next.js UI
+│   ├── components/           # Reusable UI (Navbar, responsive Sidebar)
+│   ├── context/              # Global React State (AuthContext, MobileMenuContext)
+│   ├── pages/                # Next.js Routing Pages (Funding, Authors, Analytics)
+│   ├── services/             # Axios API wrappers
+│   └── styles/               # Tailwind global configurations
+└── database/                 # SQL Scripts
+    ├── schema.sql            # Table definitions & schema design
+    └── seed.sql              # Massive mock data generation file
+```
+
+## Entity Relationships Diagram
+
+```mermaid
+erDiagram
+    users {
+        int id PK
+        varchar name
+        varchar email
+        varchar role
+    }
+    
+    journals {
+        int journal_id PK
+        varchar name
+        varchar publisher
+    }
+
+    papers {
+        int paper_id PK
+        varchar title
+        varchar doi
+        int publication_year
+        int journal_id FK
+    }
+
+    authors {
+        int author_id PK
+        varchar name
+        varchar orcid
+        varchar affiliation
+    }
+
+    paperauthors {
+        int paper_id FK
+        int author_id FK
+    }
+
+    citations {
+        int citation_id PK
+        int citing_paper_id FK
+        int cited_paper_id FK
+    }
+
+    funding_agencies {
+        int agency_id PK
+        varchar name
+        varchar type
+    }
+
+    paper_funding {
+        int paper_id FK
+        int agency_id FK
+        decimal amount
+        varchar grant_number
+    }
+
+    journals ||--o{ papers : "publishes"
+    papers ||--o{ paperauthors : "written by"
+    authors ||--o{ paperauthors : "writes"
+    papers ||--o{ citations : "cites"
+    papers ||--o{ citations : "is cited by"
+    papers ||--o{ paper_funding : "funded by"
+    funding_agencies ||--o{ paper_funding : "funds"
+```
+
