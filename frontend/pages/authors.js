@@ -27,7 +27,7 @@ export default function AuthorsPage() {
   const [selectedAuthor, setSelectedAuthor] = useState(null);
 
   const canManage =
-    user && ['Librarian', 'Administrator'].includes(user.role);
+    user && ['Department', 'Administrator'].includes(user.role);
 
   useEffect(() => {
     if (!loading && !user) {

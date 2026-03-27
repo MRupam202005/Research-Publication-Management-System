@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { LayoutDashboard, BookOpen, Users, BarChart2, Globe, Briefcase, X } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Users, BarChart2, Globe, Briefcase, Database, X } from 'lucide-react';
 import { useMobileMenu } from '@/context/MobileMenuContext';
 
 const navItems = [
@@ -33,6 +33,11 @@ const navItems = [
     href: '/funding',
     label: 'Funding',
     icon: <Briefcase className="w-4 h-4" />
+  },
+  {
+    href: '/dataset',
+    label: 'Import Dataset',
+    icon: <Database className="w-4 h-4" />
   }
 ];
 

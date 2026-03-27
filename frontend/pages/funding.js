@@ -12,7 +12,7 @@ export default function FundingPage() {
   const { user, token, loading } = useAuth();
   const router = useRouter();
 
-  const canManage = user && ['Librarian', 'Administrator'].includes(user.role);
+  const canManage = user && ['Department', 'Administrator'].includes(user.role);
   
   const [agencies, setAgencies] = useState([]);
   const [report, setReport] = useState([]);

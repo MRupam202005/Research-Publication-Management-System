@@ -4,6 +4,7 @@ const {
   citationsAnalytics,
   getAuthorAnalytics,
   getSelfCitationsHandler,
+  getBipartiteGraph,
 } = require('../controllers/analyticsController');
 const { authenticate } = require('../middleware/authMiddleware');
 
@@ -20,6 +21,9 @@ router.get('/author/:id', authenticate, getAuthorAnalytics);
 
 // Self-citations logic lookup
 router.get('/self-citations/:authorId', authenticate, getSelfCitationsHandler);
+
+// Bipartite graph mapping authors and keywords
+router.get('/bipartite-graph', authenticate, getBipartiteGraph);
 
 module.exports = router;
 

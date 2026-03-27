@@ -3,20 +3,25 @@ import { useRouter } from 'next/router';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import { SimpleBarChart, SimpleLineChart } from '@/components/AnalyticsChart';
+import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
 import {
   getHIndexAnalytics,
   getCitationsAnalytics,
-  getAuthorAnalytics
+  getAuthorAnalytics,
+  getBipartiteGraph
 } from '@/services/analyticsService';
 import { getPapers } from '@/services/paperService';
 import { getAuthors } from '@/services/authorService';
+
+const BipartiteGraph = dynamic(() => import('@/components/BipartiteGraph'), { ssr: false });
 
 export default function AnalyticsPage() {
   const { user, token, loading } = useAuth();
   const router = useRouter();
   const [hIndexStats, setHIndexStats] = useState(null);
   const [citationStats, setCitationStats] = useState(null);
+  const [graphData, setGraphData] = useState(null);
   const [papers, setPapers] = useState([]);
   const [topAuthors, setTopAuthors] = useState([]);
   const [error, setError] = useState('');
@@ -34,15 +39,17 @@ export default function AnalyticsPage() {
       try {
         setIsLoading(true);
         // Fire the primary dashboard stats in parallel
-        const [hData, cData, papersData, authorsData] = await Promise.all([
+        const [hData, cData, graphRes, papersData, authorsData] = await Promise.all([
           getHIndexAnalytics(token),
           getCitationsAnalytics(token),
+          getBipartiteGraph(token),
           getPapers(token),
           getAuthors(token)
         ]);
 
         setHIndexStats(hData);
         setCitationStats(cData);
+        setGraphData(graphRes);
         setPapers(papersData);
 
         // Fetch precise metrics for the top 5 authors to figure out their citation count safely
@@ -203,6 +210,21 @@ export default function AnalyticsPage() {
                     color="#8b5cf6" 
                   />
                 </>
+              )}
+            </section>
+
+            {/* Bipartite Graph Section */}
+            <section className="mb-20">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-4 tracking-tight">
+                Research Fields Network Map
+              </h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                A bipartite graph visualizing connections between Authors (Blue) and Research Keywords (Orange).
+              </p>
+              {isLoading ? (
+                <div className="w-full h-[500px] bg-slate-200 dark:bg-slate-800 rounded-xl animate-pulse" />
+              ) : (
+                <BipartiteGraph graphData={graphData} />
               )}
             </section>
           </div>

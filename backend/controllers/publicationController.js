@@ -98,10 +98,34 @@ const deletePublicationHandler = async (req, res, next) => {
   }
 };
 
+const getPublicationHandler = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const publication = await getPublicationById(id);
+    if (!publication) {
+      return res.status(404).json({ message: 'Publication not found' });
+    }
+    // Also fetch authors for this publication
+    const { query } = require('../config/db');
+    const authors = await query(
+      `SELECT a.author_id, a.name 
+       FROM authors a 
+       JOIN paperauthors pa ON a.author_id = pa.author_id 
+       WHERE pa.paper_id = $1`,
+      [id]
+    );
+    publication.authors = authors.rows;
+    return res.json(publication);
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   listPublications,
   createPublicationHandler,
   updatePublicationHandler,
   deletePublicationHandler,
+  getPublicationHandler,
 };
 

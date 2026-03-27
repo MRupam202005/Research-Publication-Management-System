@@ -78,6 +78,18 @@ const getSelfCitations = async (authorId) => {
   return result.rows;
 };
 
+const getBipartiteGraphData = async () => {
+  const result = await query(
+    `SELECT a.author_id, a.name as author_name, p.keywords
+     FROM authors a
+     JOIN paperauthors pa ON a.author_id = pa.author_id
+     JOIN papers p ON pa.paper_id = p.paper_id
+     WHERE p.keywords IS NOT NULL AND p.keywords != ''
+     LIMIT 500`
+  );
+  return result.rows;
+};
+
 module.exports = {
   getCitationCountsPerPaper,
   getDepartmentPublicationStats,
@@ -85,4 +97,5 @@ module.exports = {
   getMostCitedPaper,
   getAuthorAnalyticsData,
   getSelfCitations,
+  getBipartiteGraphData,
 };

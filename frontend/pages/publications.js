@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import PublicationCard from '@/components/PublicationCard';
@@ -308,9 +309,9 @@ export default function PublicationsPage() {
                             className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/60 dark:hover:bg-slate-900/60 transition-colors"
                           >
                             <td className="py-2 pr-3 align-top">
-                              <p className="font-medium text-slate-900 dark:text-slate-50">
+                              <Link href={`/publications/${paper.paper_id}`} className="font-medium text-slate-900 dark:text-slate-50 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                                 {paper.title}
-                              </p>
+                              </Link>
                               {paper.abstract && (
                                 <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
                                   {paper.abstract}

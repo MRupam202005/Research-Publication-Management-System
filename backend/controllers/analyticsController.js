@@ -5,6 +5,7 @@ const {
   getMostCitedPaper,
   getAuthorAnalyticsData,
   getSelfCitations,
+  getBipartiteGraphData,
 } = require('../models/analyticsModel');
 const {
   calculateHIndex,
@@ -95,10 +96,49 @@ const getSelfCitationsHandler = async (req, res, next) => {
   }
 };
 
+const getBipartiteGraph = async (req, res, next) => {
+  try {
+    const data = await getBipartiteGraphData();
+    
+    // Process SQL results into nodes and edges
+    const authorsMap = new Map();
+    const keywordsMap = new Map();
+    const edges = [];
+    
+    data.forEach(row => {
+      // Add Author Node
+      if (!authorsMap.has(row.author_id)) {
+        authorsMap.set(row.author_id, { id: `A-${row.author_id}`, label: row.author_name, group: 'author' });
+      }
+      
+      if (row.keywords) {
+        // Split comma-separated keywords
+        const kws = row.keywords.split(',').map(kw => kw.trim().toLowerCase()).filter(Boolean);
+        kws.forEach(kw => {
+          // Add Keyword Node
+          if (!keywordsMap.has(kw)) {
+            keywordsMap.set(kw, { id: `K-${kw}`, label: kw, group: 'keyword' });
+          }
+          // Add Edge
+          edges.push({ source: `A-${row.author_id}`, target: `K-${kw}` });
+        });
+      }
+    });
+
+    return res.json({
+      nodes: [...Array.from(authorsMap.values()), ...Array.from(keywordsMap.values())],
+      links: edges,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   hIndexAnalytics,
   citationsAnalytics,
   getAuthorAnalytics,
   getSelfCitationsHandler,
+  getBipartiteGraph,
 };
 

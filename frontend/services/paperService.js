@@ -27,3 +27,8 @@ export const deletePaper = async (token, id) => {
   await axios.delete(`${API_URL}/papers/${id}`, authHeader(token));
 };
 
+export const getPaperById = async (token, id) => {
+  const res = await axios.get(`${API_URL}/papers/${id}`, authHeader(token));
+  return res.data;
+};
+

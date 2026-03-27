@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
-const ROLES = ['Researcher', 'Administrator', 'Librarian', 'Funding Agency'];
+const ROLES = ['Researcher', 'Administrator', 'Department', 'Funding Agency'];
 
 export default function RegisterPage() {
   const { register } = useAuth();

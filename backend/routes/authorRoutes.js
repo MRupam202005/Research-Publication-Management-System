@@ -20,14 +20,14 @@ router.get('/:id/recommendations', authenticate, getCollaborationRecommendations
 router.post(
   '/',
   authenticate,
-  authorizeRoles('Librarian', 'Administrator'),
+  authorizeRoles('Department', 'Administrator'),
   createAuthorHandler,
 );
 
 router.put(
   '/:id',
   authenticate,
-  authorizeRoles('Librarian', 'Administrator'),
+  authorizeRoles('Department', 'Administrator'),
   updateAuthorHandler,
 );
 

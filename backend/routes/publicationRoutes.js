@@ -4,6 +4,7 @@ const {
   createPublicationHandler,
   updatePublicationHandler,
   deletePublicationHandler,
+  getPublicationHandler,
 } = require('../controllers/publicationController');
 const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 const { validatePublication } = require('../middleware/validationMiddleware');
@@ -11,6 +12,7 @@ const { validatePublication } = require('../middleware/validationMiddleware');
 const router = express.Router();
 
 router.get('/', authenticate, listPublications);
+router.get('/:id', authenticate, getPublicationHandler);
 
 router.post(
   '/',

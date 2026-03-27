@@ -3,12 +3,13 @@ import { useRouter } from 'next/router';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/context/AuthContext';
-import { getHIndexAnalytics } from '@/services/analyticsService';
+import { getHIndexAnalytics, getCitationsAnalytics } from '@/services/analyticsService';
 
 export default function DashboardPage() {
   const { user, token, loading } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState(null);
+  const [deptStats, setDeptStats] = useState(null);
   const [error, setError] = useState('');
   const [loadingStats, setLoadingStats] = useState(false);
 
@@ -23,8 +24,14 @@ export default function DashboardPage() {
       if (!token) return;
       try {
         setLoadingStats(true);
-        const data = await getHIndexAnalytics(token);
+        const [data, citationsData] = await Promise.all([
+          getHIndexAnalytics(token),
+          getCitationsAnalytics(token).catch(() => null)
+        ]);
         setStats(data);
+        if (citationsData) {
+          setDeptStats(citationsData.perDepartment);
+        }
       } catch (err) {
         setError(err?.response?.data?.message || 'Failed to load analytics');
       } finally {
@@ -102,6 +109,29 @@ export default function DashboardPage() {
                 analytics in more detail.
               </p>
             </section>
+
+            {user?.role === 'Department' && (
+              <section className="mt-6">
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50 mb-4 tracking-tight">
+                  Department Intelligence
+                </h2>
+                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+                  <h3 className="text-md font-semibold text-slate-800 dark:text-slate-100 mb-4">Inter-Departmental Research Output</h3>
+                  {deptStats && deptStats.length > 0 ? (
+                    <ul className="space-y-3">
+                      {deptStats.map((dept, idx) => (
+                        <li key={idx} className="flex justify-between items-center p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                          <span className="text-slate-700 dark:text-slate-300 font-medium">{dept.department || 'Unspecified'}</span>
+                          <span className="bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300 text-sm font-bold px-3 py-1 rounded-full">{dept.publication_count} papers</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-slate-500">No departmental data available yet.</p>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
         </main>
       </div>

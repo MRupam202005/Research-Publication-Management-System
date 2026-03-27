@@ -22,3 +22,8 @@ export const getAuthorAnalytics = async (token, id) => {
   const res = await axios.get(`${API_URL}/analytics/author/${id}`, authHeader(token));
   return res.data;
 };
+
+export const getBipartiteGraph = async (token) => {
+  const res = await axios.get(`${API_URL}/analytics/bipartite-graph`, authHeader(token));
+  return res.data;
+};

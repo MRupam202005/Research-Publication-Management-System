@@ -9,6 +9,7 @@ const analyticsRoutes = require('./routes/analyticsRoutes');
 const citationRoutes = require('./routes/citationRoutes');
 const researchRoutes = require('./routes/researchRoutes');
 const fundingRoutes = require('./routes/fundingRoutes');
+const datasetRoutes = require('./routes/datasetRoutes');
 
 const { errorHandler } = require('./middleware/errorMiddleware');
 
@@ -28,6 +29,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/citations', citationRoutes);
 app.use('/api/research', researchRoutes);
 app.use('/api/funding', fundingRoutes);
+app.use('/api/datasets', datasetRoutes);
 
 app.use(errorHandler);
 
