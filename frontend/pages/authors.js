@@ -6,7 +6,7 @@ import AuthorCard from '@/components/AuthorCard';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthors, createAuthor, getCollaborationRecommendations } from '@/services/authorService';
 import { getSelfCitations } from '@/services/analyticsService';
-import { Sparkles, Users, Activity } from 'lucide-react';
+import { Sparkles, Users, Activity, X } from 'lucide-react';
 
 export default function AuthorsPage() {
   const { user, token, loading } = useAuth();
@@ -25,6 +25,10 @@ export default function AuthorsPage() {
   const [selfCitations, setSelfCitations] = useState(null);
   const [recLoading, setRecLoading] = useState(false);
   const [selectedAuthor, setSelectedAuthor] = useState(null);
+  const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [authorStats, setAuthorStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
   const canManage =
     user && ['Department', 'Administrator'].includes(user.role);
@@ -81,6 +85,7 @@ export default function AuthorsPage() {
   const handleGetInsights = async (author) => {
     if (!token) return;
     setSelectedAuthor(author);
+    setIsInsightsOpen(true);
     setRecLoading(true);
     try {
       const [recData, citesData] = await Promise.all([
@@ -93,6 +98,23 @@ export default function AuthorsPage() {
       console.error(err);
     } finally {
       setRecLoading(false);
+    }
+  };
+
+  const handleOpenDetails = async (author) => {
+    if (!token) return;
+    setSelectedAuthor(author);
+    setIsDetailsOpen(true);
+    setStatsLoading(true);
+    setAuthorStats(null);
+    try {
+      const { getAuthorAnalytics } = await import('@/services/analyticsService');
+      const stats = await getAuthorAnalytics(token, author.author_id);
+      setAuthorStats(stats);
+    } catch (err) {
+       console.error(err);      
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -233,9 +255,12 @@ export default function AuthorsPage() {
                             className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/60 dark:hover:bg-slate-900/60 transition-colors"
                           >
                             <td className="py-2 pr-3 align-top">
-                              <p className="font-medium text-slate-900 dark:text-slate-50">
+                              <button 
+                                onClick={() => handleOpenDetails(author)}
+                                className="font-medium text-slate-900 dark:text-slate-50 hover:text-indigo-600 dark:hover:text-indigo-400 text-left transition-colors"
+                              >
                                 {author.name}
-                              </p>
+                              </button>
                             </td>
                             <td className="py-2 px-3 align-top text-slate-600 dark:text-slate-300">
                               {author.affiliation || '—'}
@@ -274,85 +299,161 @@ export default function AuthorsPage() {
               </div>
             </section>
 
-            {/* Insights Section */}
-            {selectedAuthor && (
-              <section className="bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/10 dark:to-slate-900 border border-indigo-100 dark:border-indigo-800/50 shadow-sm rounded-xl p-6 relative overflow-hidden mt-2 flex flex-col gap-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg">
-                    <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-                      Author Insights for {selectedAuthor.name}
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      Explore collaboration opportunities and self-citation patterns.
-                    </p>
-                  </div>
-                </div>
-
-                {recLoading ? (
-                  <div className="flex items-center justify-center p-8 bg-white/50 dark:bg-slate-900/50 rounded-lg border border-dashed border-indigo-200 dark:border-indigo-800">
-                    <span className="text-sm font-medium text-slate-500 animate-pulse">Analyzing network...</span>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Collaborators Column */}
-                    <div>
-                      <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200 mb-3 uppercase tracking-wide flex items-center gap-2">
-                        <Users className="w-4 h-4 text-indigo-500" /> Suggested Collaborators
-                      </h4>
-                      {recommendations.length > 0 ? (
-                        <div className="grid gap-3">
-                          {recommendations.map(rec => (
-                            <div key={rec.author_id} className="p-3 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
-                              <div className="truncate pr-4">
-                                <h5 className="font-medium inline text-sm text-slate-900 dark:text-slate-50 truncate">{rec.name}</h5>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{rec.affiliation || 'Unknown Affiliation'}</p>
-                              </div>
-                              <div className="shrink-0 px-2 py-1 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-semibold rounded">
-                                {rec.mutual_connections} Mutual
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-slate-500">No mutual collaborators found.</p>
-                      )}
+            {/* Floating Insights Modal */}
+            {isInsightsOpen && selectedAuthor && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+                  <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg">
+                        <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+                          Author Insights
+                        </h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          {selectedAuthor.name}
+                        </p>
+                      </div>
                     </div>
-
-                    {/* Self Citations Column */}
-                    <div>
-                      <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200 mb-3 uppercase tracking-wide flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-rose-500" /> Self-Citation Pattern
-                      </h4>
-                      {selfCitations && selfCitations.count !== undefined ? (
-                        <div className="p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                          <div className="flex items-end gap-3 mb-2">
-                            <span className="text-4xl font-bold text-slate-900 dark:text-white leading-none">{selfCitations.count}</span>
-                            <span className="text-sm text-slate-500 dark:text-slate-400 mb-1">self-citations detected</span>
-                          </div>
-                          {selfCitations.count > 3 ? (
-                            <div className="mt-3 p-3 bg-rose-50 dark:bg-rose-900/20 text-rose-800 dark:text-rose-300 text-xs rounded border border-rose-100 dark:border-rose-800/50">
-                              Warning: This author exhibits a high rate of self-citations which may artificially inflate metrics.
-                            </div>
-                          ) : selfCitations.count > 0 ? (
-                            <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 text-xs rounded border border-amber-100 dark:border-amber-800/50">
-                              Moderate level of self-citation observed. This is typical for cumulative research.
+                    <button 
+                      onClick={() => setIsInsightsOpen(false)}
+                      className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  
+                  <div className="p-6 overflow-y-auto">
+                    {recLoading ? (
+                      <div className="flex flex-col items-center justify-center py-12">
+                        <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4" />
+                        <span className="text-sm font-medium text-slate-500 animate-pulse">Analyzing network & citations...</span>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Collaborators Column */}
+                        <div>
+                          <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200 mb-3 uppercase tracking-wide flex items-center gap-2">
+                            <Users className="w-4 h-4 text-indigo-500" /> Suggested Collaborators
+                          </h4>
+                          {recommendations.length > 0 ? (
+                            <div className="grid gap-3">
+                              {recommendations.map(rec => (
+                                <div key={rec.author_id} className="p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+                                  <div className="truncate pr-4">
+                                    <h5 className="font-medium inline text-sm text-slate-900 dark:text-slate-50 truncate">{rec.name}</h5>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{rec.affiliation || 'Unknown Affiliation'}</p>
+                                  </div>
+                                  <div className="shrink-0 px-2 py-1 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-semibold rounded">
+                                    {rec.mutual_connections} Mutual
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           ) : (
-                            <div className="mt-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300 text-xs rounded border border-emerald-100 dark:border-emerald-800/50">
-                              Excellent: No self-citations detected in the tracking record.
-                            </div>
+                            <p className="text-sm text-slate-500 italic p-4 bg-slate-50 dark:bg-slate-800 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">No mutual collaborators found.</p>
                           )}
                         </div>
-                      ) : (
-                        <p className="text-sm text-slate-500">Self-citation data unavailable.</p>
+
+                        {/* Self Citations Column */}
+                        <div>
+                          <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200 mb-3 uppercase tracking-wide flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-rose-500" /> Self-Citation Pattern
+                          </h4>
+                          {selfCitations && selfCitations.count !== undefined ? (
+                            <div className="p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                              <div className="flex items-end gap-3 mb-2">
+                                <span className="text-4xl font-bold text-slate-900 dark:text-white leading-none">{selfCitations.count}</span>
+                                <span className="text-sm text-slate-500 dark:text-slate-400 mb-1">self-citations</span>
+                              </div>
+                              {selfCitations.count > 3 ? (
+                                <div className="mt-3 p-3 bg-rose-50 dark:bg-rose-900/20 text-rose-800 dark:text-rose-300 text-xs rounded border border-rose-100 dark:border-rose-800/50">
+                                  Warning: High rate of self-citations may artificially inflate metrics.
+                                </div>
+                              ) : selfCitations.count > 0 ? (
+                                <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 text-xs rounded border border-amber-100 dark:border-amber-800/50">
+                                  Moderate level observed. Typical for cumulative research.
+                                </div>
+                              ) : (
+                                <div className="mt-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300 text-xs rounded border border-emerald-100 dark:border-emerald-800/50">
+                                  Excellent: No self-citations detected in the tracking record.
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-slate-500">Self-citation data unavailable.</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Floating Author Details Modal */}
+            {isDetailsOpen && selectedAuthor && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-lg overflow-hidden">
+                  <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900">
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Author Profile</h3>
+                    <button 
+                      onClick={() => setIsDetailsOpen(false)}
+                      className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="p-6">
+                    <div className="mb-6">
+                      <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{selectedAuthor.name}</h2>
+                      <p className="text-slate-600 dark:text-slate-400 mt-1 flex items-center gap-2">
+                        {selectedAuthor.affiliation || 'No affiliation recorded'}
+                      </p>
+                      {selectedAuthor.orcid_id && (
+                        <p className="text-sm font-mono text-indigo-600 dark:text-indigo-400 mt-2 bg-indigo-50 dark:bg-indigo-900/20 inline-flex px-2 py-1 rounded">
+                          ORCID: {selectedAuthor.orcid_id}
+                        </p>
                       )}
                     </div>
+                    
+                    <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-200 mb-3 uppercase tracking-wide">
+                      Research Impact
+                    </h4>
+                    
+                    {statsLoading ? (
+                      <div className="flex justify-center py-6">
+                        <div className="w-6 h-6 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                      </div>
+                    ) : authorStats ? (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 text-center">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">Publications</p>
+                          <p className="text-2xl font-bold text-slate-900 dark:text-white">{authorStats.total_papers}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 text-center">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">Total Citations</p>
+                          <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{authorStats.total_citations}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 text-center">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">h-index</p>
+                          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{authorStats.h_index}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 text-center">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">i10-index</p>
+                          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{authorStats.i10_index}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center text-sm text-slate-500">
+                        No publications or citation data available for this author.
+                      </div>
+                    )}
                   </div>
-                )}
-              </section>
+                </div>
+              </div>
             )}
           </div>
         </main>
