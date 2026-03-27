@@ -3,8 +3,8 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
-import PublicationCard from '@/components/PublicationCard';
 import { useAuth } from '@/context/AuthContext';
+import { BookOpen, FileText, PlusCircle, Search } from 'lucide-react';
 import {
   getPapers,
   createPaper,
@@ -139,15 +139,31 @@ export default function PublicationsPage() {
       <div className="dashboard-content">
         <Navbar />
         <main className="dashboard-main">
-          <div className="flex flex-col gap-6">
-            <section className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50 mb-1 tracking-tight">
-                  Publications
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Browse and manage research papers.
-                </p>
+          <div className="flex flex-col gap-8">
+            {/* Premium Header Banner */}
+            <section className="relative overflow-hidden rounded-[2rem] bg-indigo-900 shadow-2xl border border-indigo-800">
+              <div className="absolute inset-0">
+                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-indigo-900 to-slate-900 opacity-90 mix-blend-multiply" />
+              </div>
+              
+              {/* Decorative blurs */}
+              <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/4 w-[300px] h-[300px] bg-blue-500/30 rounded-full blur-[80px]" />
+              <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[250px] h-[250px] bg-purple-500/30 rounded-full blur-[60px]" />
+
+              <div className="relative z-10 p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="flex items-center gap-5">
+                  <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-inner">
+                    <BookOpen className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">
+                      Publications
+                    </h2>
+                    <p className="text-indigo-200 text-sm md:text-base max-w-xl font-medium">
+                      Browse, manage, and explore the complete repository of institutional research papers and their citation networks.
+                    </p>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -158,12 +174,19 @@ export default function PublicationsPage() {
             )}
 
             {canManage && (
-              <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-xl p-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary-50 dark:bg-primary-900/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-[2rem] p-8 relative overflow-hidden group">
+                {/* Background decorative elements */}
+                <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-indigo-100 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-50 dark:bg-blue-900/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
                 
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50 mb-5 relative z-10">
-                  {editingId ? 'Edit publication' : 'Add new publication'}
-                </h3>
+                <div className="flex items-center gap-3 mb-8 relative z-10">
+                  <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
+                    {editingId ? <FileText className="w-5 h-5" /> : <PlusCircle className="w-5 h-5" />}
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    {editingId ? 'Edit Publication Details' : 'Add New Publication'}
+                  </h3>
+                </div>
                 <form
                   onSubmit={handleSubmit}
                   className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10"
@@ -226,25 +249,25 @@ export default function PublicationsPage() {
                       className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
                     />
                   </div>
-                  <div className="flex items-center gap-3 mt-4">
+                  <div className="flex items-center gap-4 mt-6">
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 rounded-lg shadow-md hover:shadow-lg disabled:opacity-60 transition-all"
+                      className="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-xl shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] disabled:opacity-60 transition-all hover:-translate-y-0.5"
                     >
                       {submitting
                         ? 'Saving...'
                         : editingId
-                          ? 'Update Publication'
-                          : 'Create Publication'}
+                          ? 'Update Publication Record'
+                          : 'Publish to Network'}
                     </button>
                     {editingId && (
                       <button
                         type="button"
                         onClick={resetForm}
-                        className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium"
+                        className="px-6 py-3 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
                       >
-                        Cancel
+                        Cancel Edit
                       </button>
                     )}
                   </div>
@@ -252,14 +275,23 @@ export default function PublicationsPage() {
               </section>
             )}
 
-            <section className="card-surface p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                  All publications
-                </h3>
+            {/* Table Section */}
+            <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-[2rem] overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 md:p-8 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                      Publication Directory
+                    </h3>
+                    <p className="text-sm text-slate-500 font-medium mt-0.5">Manage existing records in the database.</p>
+                  </div>
+                </div>
                 {loadingPapers && (
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    Loading...
+                  <span className="mt-4 sm:mt-0 inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1.5 rounded-full animate-pulse">
+                     <div className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" /> Updating...
                   </span>
                 )}
               </div>

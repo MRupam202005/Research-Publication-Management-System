@@ -1,11 +1,24 @@
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, LogOut, Menu } from 'lucide-react';
+import { Sun, Moon, LogOut, Menu, LayoutDashboard, BookOpen, Users, BarChart2, Globe, Briefcase, Database } from 'lucide-react';
 import { useMobileMenu } from '@/context/MobileMenuContext';
+
+const navItems = [
+  { href: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+  { href: '/publications', label: 'Publications', icon: <BookOpen className="w-4 h-4" /> },
+  { href: '/authors', label: 'Authors', icon: <Users className="w-4 h-4" /> },
+  { href: '/analytics', label: 'Analytics', icon: <BarChart2 className="w-4 h-4" /> },
+  { href: '/explore', label: 'Explore', icon: <Globe className="w-4 h-4" /> },
+  { href: '/funding', label: 'Funding', icon: <Briefcase className="w-4 h-4" /> },
+  { href: '/dataset', label: 'Import Dataset', icon: <Database className="w-4 h-4" /> }
+];
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const { theme, setTheme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { toggle } = useMobileMenu();
@@ -29,18 +42,39 @@ const Navbar = () => {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-primary-500 to-primary-700 text-white text-lg font-semibold shadow-soft-lg transition-transform hover:scale-105 hover:rotate-3 duration-300">
-          R
-        </span>
-        <div>
-          <h1 className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-50 tracking-tight">
-            Research Publication Management System
-          </h1>
-          <p className="text-[11px] md:text-xs text-slate-500 dark:text-slate-400">
-            Track publications, citations, and collaborations
-          </p>
-        </div>
+        <Link href="/" className="inline-flex items-center gap-2 group">
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-base font-bold shadow-md transition-transform group-hover:scale-105 duration-300">
+            R
+          </span>
+          <div className="hidden sm:block">
+            <h1 className="text-sm font-bold text-slate-900 dark:text-slate-50 tracking-tight">
+              ResearchNexus
+            </h1>
+          </div>
+        </Link>
       </div>
+
+      {user && (
+        <nav className="hidden md:flex items-center gap-1 xl:gap-2">
+          {navItems.map(item => {
+            const isActive = router.pathname === item.href;
+            return (
+              <Link 
+                key={item.href} 
+                href={item.href} 
+                className={`flex items-center gap-2 px-3 lg:px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 shadow-sm' 
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {item.icon}
+                <span className="hidden lg:inline">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      )}
       <div className="flex items-center gap-3 md:gap-4">
         <button
           type="button"
