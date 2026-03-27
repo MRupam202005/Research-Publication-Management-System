@@ -76,18 +76,20 @@ export default function LoginPage() {
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 overflow-x-hidden">
       
       {/* 1. HERO & LOGIN SECTION (100vh) */}
-      <section className="flex flex-col lg:flex-row w-full min-h-screen shrink-0 bg-white dark:bg-slate-950">
-        {/* Left Panel - Hero/Image & Animations */}
-        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-slate-900 border-r border-slate-200 dark:border-slate-800">
-          <div className="absolute inset-0 z-0">
-            <img 
-              src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=2000" 
-              alt="Research Library" 
-              className="w-full h-full object-cover transform scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/95 via-slate-900/80 to-indigo-900/60 mix-blend-multiply" />
-            <div className="absolute inset-0 bg-indigo-600/20 mix-blend-overlay" />
-          </div>
+      <section className="relative flex flex-col lg:flex-row w-full min-h-screen shrink-0 overflow-hidden">
+        {/* Full Screen Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=2000" 
+            alt="Research Library" 
+            className="w-full h-full object-cover transform scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/95 via-slate-900/80 to-indigo-900/60 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-indigo-600/20 mix-blend-overlay" />
+        </div>
+
+        {/* Left Panel - Animations */}
+        <div className="hidden lg:flex lg:w-1/2 relative z-10">
 
           <div className="relative z-10 flex flex-col justify-between w-full p-12 lg:p-16 text-white">
             <div>
@@ -135,30 +137,30 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right Panel - Login Form */}
-        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-8 sm:p-12 lg:p-16 relative">
+        {/* Right Panel - Glassmorphic Login Form */}
+        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 sm:p-12 relative z-10">
           
           {/* Mobile Header */}
-          <div className="lg:hidden flex items-center gap-2 mb-12 self-start">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-              <Network className="w-5 h-5 text-white" />
+          <div className="lg:hidden flex items-center gap-2 mb-8 self-center">
+            <div className="w-10 h-10 bg-indigo-600/80 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border border-indigo-400/30">
+              <Network className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">ResearchNexus</span>
+            <span className="text-2xl font-bold tracking-tight text-white drop-shadow-md">ResearchNexus</span>
           </div>
 
-          <div className="w-full max-w-md">
-            <div className="text-center lg:text-left mb-10">
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-3">
+          <div className="w-full max-w-md bg-white/10 dark:bg-slate-950/30 backdrop-blur-xl border border-white/20 dark:border-white/10 p-8 sm:p-10 rounded-[2rem] shadow-2xl">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl font-bold text-white tracking-tight mb-3 drop-shadow-md">
                 Welcome back
               </h2>
-              <p className="text-slate-500 dark:text-slate-400">
+              <p className="text-indigo-100/80 dark:text-slate-300">
                 Sign in to your account to manage your research publications and view analytics.
               </p>
             </div>
 
             {error && (
-              <div className="mb-6 p-4 rounded-xl text-sm text-red-700 bg-red-50 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/30 flex items-start gap-3">
-                <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="mb-6 p-4 rounded-xl text-sm text-red-100 bg-red-600/40 backdrop-blur-md border border-red-400/30 flex items-start gap-3">
+                <svg className="w-5 h-5 shrink-0 mt-0.5 text-red-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>{error}</span>
@@ -167,13 +169,13 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                <label htmlFor="email" className="block text-sm font-semibold text-white/90">
                   Email address
                 </label>
                 <input
                   id="email"
                   type="email"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-white focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400 shadow-sm"
+                  className="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white focus:border-indigo-400 focus:bg-white/20 focus:ring-2 focus:ring-indigo-400/50 outline-none transition-all placeholder:text-white/40 shadow-inner"
                   placeholder="you@university.edu"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -183,17 +185,17 @@ export default function LoginPage() {
               
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <label htmlFor="password" className="block text-sm font-semibold text-white/90">
                     Password
                   </label>
-                  <a href="#" className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+                  <a href="#" className="text-xs font-semibold text-indigo-300 hover:text-indigo-200 transition-colors">
                     Forgot password?
                   </a>
                 </div>
                 <input
                   id="password"
                   type="password"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-white focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400 shadow-sm"
+                  className="w-full px-4 py-3 rounded-xl border border-white/20 bg-white/10 text-white focus:border-indigo-400 focus:bg-white/20 focus:ring-2 focus:ring-indigo-400/50 outline-none transition-all placeholder:text-white/40 shadow-inner"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -204,7 +206,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full relative flex justify-center items-center py-3.5 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                className="w-full relative flex justify-center items-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-indigo-900 bg-white hover:bg-indigo-50 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent focus:ring-white disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] duration-300"
               >
                 {submitting ? (
                    <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
@@ -220,16 +222,16 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <p className="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
+            <p className="mt-8 text-center text-sm text-indigo-100/70">
               Don't have an account?{' '}
-              <Link href="/register" className="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 hover:underline transition-all">
+              <Link href="/register" className="font-bold text-white hover:text-indigo-200 hover:underline transition-all">
                 Create one now
               </Link>
             </p>
           </div>
           
           {/* Scroll Indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-slate-400 animate-bounce">
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-white/50 animate-bounce cursor-pointer hover:text-white transition-colors">
              <span className="text-[10px] uppercase font-bold tracking-widest mb-2">Scroll</span>
              <ChevronRight className="w-4 h-4 rotate-90 opacity-70" />
           </div>
