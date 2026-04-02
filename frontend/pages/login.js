@@ -230,13 +230,13 @@ export default function LoginPage() {
             </p>
           </div>
           
-          {/* Scroll Indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-white/50 animate-bounce cursor-pointer hover:text-white transition-colors">
+          {/* Scroll Indicator  */}
+          {/* <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center text-white/50 animate-bounce cursor-pointer hover:text-white transition-colors">
              <span className="text-[10px] uppercase font-bold tracking-widest mb-2">Scroll</span>
              <ChevronRight className="w-4 h-4 rotate-90 opacity-70" />
-          </div>
+          </div> */}
         </div>
-      </section>
+      </section> 
 
       {/* 2. PLATFORM CAPABILITIES SECTION */}
       <section className="py-24 px-6 relative bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900">

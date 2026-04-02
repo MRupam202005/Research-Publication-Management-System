@@ -56,6 +56,30 @@ export default function PublicationsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  useEffect(() => {
+    // Check if we are importing a publication from explore search
+    const importedData = sessionStorage.getItem('importPublication');
+    if (importedData) {
+      try {
+        const parsedData = JSON.parse(importedData);
+        setForm((prev) => ({
+          ...prev,
+          title: parsedData.title || '',
+          abstract: parsedData.abstract || '',
+          doi: parsedData.doi || '',
+          year: parsedData.year || ''
+        }));
+        
+        // Scroll to the top where the add publication form is located
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        console.error('Failed to parse imported publication', err);
+      } finally {
+        sessionStorage.removeItem('importPublication');
+      }
+    }
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -80,7 +104,7 @@ export default function PublicationsPage() {
     try {
       const payload = {
         ...form,
-        year: Number(form.year) || new Date().getFullYear(),
+        publication_year: Number(form.year) || new Date().getFullYear(),
         journal_id: form.journal_id ? Number(form.journal_id) : null
       };
       if (editingId) {
@@ -211,8 +235,8 @@ export default function PublicationsPage() {
                       name="abstract"
                       value={form.abstract}
                       onChange={handleChange}
-                      rows={3}
-                      className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
+                      rows={6}
+                      className="block w-full min-h-[150px] resize-y rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent"
                     />
                   </div>
                   <div>

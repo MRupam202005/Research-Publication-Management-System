@@ -4,7 +4,17 @@ import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/context/AuthContext';
 import { getHIndexAnalytics, getCitationsAnalytics } from '@/services/analyticsService';
-import { TrendingUp, Award, BookOpen, Activity, ArrowRight, Sparkles, Network } from 'lucide-react';
+import { TrendingUp, Award, BookOpen, Activity, ArrowRight, Sparkles, Network, Globe, Library, Zap } from 'lucide-react';
+import { SimpleBarChart, SimpleLineChart } from '@/components/AnalyticsChart';
+
+const platformActivityData = [
+  { month: 'Jan', papers: 14, citations: 40 },
+  { month: 'Feb', papers: 25, citations: 52 },
+  { month: 'Mar', papers: 28, citations: 89 },
+  { month: 'Apr', papers: 36, citations: 110 },
+  { month: 'May', papers: 44, citations: 155 },
+  { month: 'Jun', papers: 58, citations: 280 },
+];
 
 export default function DashboardPage() {
   const { user, token, loading } = useAuth();
@@ -148,14 +158,111 @@ export default function DashboardPage() {
                 ))}
             </section>
 
-            <section className="card-surface p-4">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-50 mb-2">
-                Activity
-              </h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Use the navigation to explore publications, authors, and
-                analytics in more detail.
-              </p>
+            {/* Visual Analytics Overview */}
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
+              <SimpleLineChart 
+                data={platformActivityData} 
+                xKey="month" 
+                yKey="citations" 
+                color="#6366f1" 
+                title="Citation Trajectory (Network)" 
+              />
+              <SimpleBarChart 
+                data={platformActivityData} 
+                xKey="month" 
+                yKey="papers" 
+                color="#ec4899" 
+                title="Publication Output Volume" 
+              />
+            </section>
+
+            {/* Platform Capabilities */}
+            <section className="mt-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2.5 bg-sky-100 dark:bg-sky-900/50 rounded-xl">
+                  <Globe className="w-6 h-6 text-sky-600 dark:text-sky-400" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
+                    Platform Ecosystem
+                  </h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Leverage our next-generation architecture to supercharge your research.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Feature 1 */}
+                <div className="relative group overflow-hidden rounded-[2rem] h-[300px] shadow-lg border border-slate-200 dark:border-slate-800">
+                  <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800" alt="Global Network" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end">
+                    <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-xl w-fit mb-3 border border-white/20 shadow-sm">
+                      <Network className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2 leading-tight drop-shadow-md">Bipartite Citation Networks</h3>
+                    <p className="text-sm text-slate-300 line-clamp-2 drop-shadow-md font-medium">Map complex relationships between authors, institutions, and overarching research domains instantaneously.</p>
+                  </div>
+                </div>
+
+                {/* Feature 2 */}
+                <div className="relative group overflow-hidden rounded-[2rem] h-[300px] shadow-lg border border-slate-200 dark:border-slate-800">
+                  <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800" alt="Library" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end">
+                    <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-xl w-fit mb-3 border border-white/20 shadow-sm">
+                      <Library className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2 leading-tight drop-shadow-md">Vast Paper Repository</h3>
+                    <p className="text-sm text-slate-300 line-clamp-2 drop-shadow-md font-medium">Explore millions of peer-reviewed articles connected through our comprehensive global database integration.</p>
+                  </div>
+                </div>
+
+                {/* Feature 3 */}
+                <div className="relative group overflow-hidden rounded-[2rem] h-[300px] shadow-lg border border-slate-200 dark:border-slate-800 lg:col-span-1 md:col-span-2">
+                  <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800" alt="Cyber Technology" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end">
+                    <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-xl w-fit mb-3 border border-white/20 shadow-sm">
+                      <Zap className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white mb-2 leading-tight drop-shadow-md">Real-time Metrics Tracking</h3>
+                    <p className="text-sm text-slate-300 line-clamp-2 drop-shadow-md font-medium">Monitor h-index velocity, algorithmic citation spikes, and dataset influence seamlessly within your unified portal.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Educational Insight Banner */}
+            <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2rem] p-8 md:p-12 shadow-xl relative overflow-hidden mt-8">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 dark:bg-indigo-900/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div>
+                  <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider mb-5">
+                    Research Daily
+                  </span>
+                  <h3 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white leading-[1.15] mb-5 tracking-tight">
+                    Maximizing Your Institutional h-index Growth.
+                  </h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed text-[15px]">
+                    A strong h-index isn't just about publishing frequently—it's about publishing smartly. Open Access (OA) articles continually demonstrate a substantial citation advantage. By systematically leveraging ResearchNexus's integrated preprint pipelines, you can exponentially increase your early visibility and secure crucial citations during the critical first 12 months post-publication.
+                  </p>
+                  <button className="text-indigo-600 dark:text-indigo-400 font-bold inline-flex items-center gap-2 hover:gap-3 transition-all hover:text-indigo-700 dark:hover:text-indigo-300 px-1">
+                    Read the full strategy guide <ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="hidden md:block">
+                  <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl relative border border-slate-200 dark:border-slate-800 group">
+                    <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=1000" alt="Library Books" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent flex items-end p-6">
+                       <span className="text-white font-semibold flex items-center gap-2">
+                          <BookOpen className="w-4 h-4 text-indigo-300"/> Best Practices 2026
+                       </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
 
             {user?.role === 'Department' && (

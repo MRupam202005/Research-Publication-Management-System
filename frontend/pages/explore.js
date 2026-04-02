@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/context/AuthContext';
-import { Search, ExternalLink, Download } from 'lucide-react';
+import { Search, ExternalLink, Download, Plus } from 'lucide-react';
 import axios from 'axios';
 
 export default function ExplorePage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [query, setQuery] = useState('');
   const [papers, setPapers] = useState([]);
@@ -13,14 +15,46 @@ export default function ExplorePage() {
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
 
-  const performSearch = async (searchQuery) => {
+  const canManage = user && ['Researcher', 'Administrator'].includes(user.role);
+
+  const handleAddPublication = (paper) => {
+    sessionStorage.setItem('importPublication', JSON.stringify({
+      title: paper.title || '',
+      abstract: paper.abstract || '',
+      doi: paper.doi ? paper.doi.replace('https://doi.org/', '') : '',
+      year: paper.publicationYear?.toString() || ''
+    }));
+    router.push('/publications');
+  };
+
+  // Sync state with URL to persist search across navigation
+  useEffect(() => {
+    if (!router.isReady) return;
+    
+    const urlQuery = router.query.q;
+    
+    // If the URL has a query that we haven't loaded yet, run the search
+    if (urlQuery && urlQuery !== query && !loading) {
+      setQuery(urlQuery);
+      executeSearch(urlQuery);
+    } 
+    // If the URL doesn't have a query but we do, clear our state (user hit 'back' to blank page)
+    else if (!urlQuery && hasSearched) {
+      setQuery('');
+      setPapers([]);
+      setHasSearched(false);
+      setError('');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, router.query.q]);
+
+  const executeSearch = async (searchQuery) => {
     if (!searchQuery.trim()) return;
 
     setLoading(true);
     setError('');
     setHasSearched(true);
-    setQuery(searchQuery);
-
+    
     try {
       // Use full URL or proxy if configured in Next.js
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -33,6 +67,21 @@ export default function ExplorePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const performSearch = (searchQuery) => {
+    if (!searchQuery.trim()) return;
+    setQuery(searchQuery);
+    
+    // Update the URL without a full page reload so it persists
+    router.push({
+      pathname: '/explore',
+      query: { q: searchQuery }
+    }, undefined, { shallow: true });
+    
+    // The search execution is handled by executeSearch, but we can call it immediately 
+    // or let the useEffect handle it. It's faster to run it here:
+    executeSearch(searchQuery);
   };
 
   const handleSearch = (e) => {
@@ -174,17 +223,26 @@ export default function ExplorePage() {
                       </div>
                       
                       {paper.pdfUrl && (
-                        <div className="flex flex-col gap-2 shrink-0">
-                          <a
-                            href={paper.pdfUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800/50"
-                          >
-                            <Download className="w-4 h-4" />
-                            View PDF
-                          </a>
-                        </div>
+                        <a
+                          href={paper.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50 rounded-lg transition-colors border border-indigo-200 dark:border-indigo-800/50"
+                        >
+                          <Download className="w-4 h-4" />
+                          View PDF
+                        </a>
+                      )}
+                      
+                      {canManage && (
+                        <button
+                          type="button"
+                          onClick={() => handleAddPublication(paper)}
+                          className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Add Publication
+                        </button>
                       )}
                     </div>
                   </div>
