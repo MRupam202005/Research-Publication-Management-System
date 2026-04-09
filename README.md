@@ -197,7 +197,7 @@ erDiagram
     %% Relationships
     JOURNALS ||--o{ PAPERS : "publishes"
     
-    PAPERS ||--o{ PAPERAUTHORS : "has"
+    PAPERS ||--o{ PAPERAUTHORS : "written by"
     AUTHORS ||--o{ PAPERAUTHORS : "writes"
     
     PAPERS ||--o{ CITATIONS : "cites"
