@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import { SimpleBarChart, SimpleLineChart } from '@/components/AnalyticsChart';
 import dynamic from 'next/dynamic';
@@ -305,6 +306,7 @@ export default function AnalyticsPage() {
             </motion.section>
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );

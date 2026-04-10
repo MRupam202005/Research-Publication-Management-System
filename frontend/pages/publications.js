@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/context/AuthContext';
 import { BookOpen, FileText, PlusCircle, Search } from 'lucide-react';
@@ -27,10 +28,12 @@ export default function PublicationsPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [loadingPapers, setLoadingPapers] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const canManage =
-    user && ['Researcher', 'Administrator'].includes(user.role);
-  const canDelete = user && user.role === 'Administrator';
+    user && ['Researcher', 'Administrator', 'Librarian'].includes(user.role);
+  const canDelete = user && ['Administrator', 'Librarian'].includes(user.role);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -156,6 +159,29 @@ export default function PublicationsPage() {
       </div>
     );
   }
+
+  // Derive filtered papers and suggestions client-side
+  const filteredPapers = papers.filter((p) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      p.title?.toLowerCase().includes(term) ||
+      p.journal_name?.toLowerCase().includes(term) ||
+      p.doi?.toLowerCase().includes(term) ||
+      p.abstract?.toLowerCase().includes(term)
+    );
+  });
+
+  const getSuggestions = () => {
+    if (!searchTerm.trim()) return [];
+    const term = searchTerm.toLowerCase();
+    const suggestions = new Set();
+    papers.forEach((p) => {
+      if (p.title?.toLowerCase().includes(term)) suggestions.add(p.title);
+      if (p.journal_name?.toLowerCase().includes(term)) suggestions.add(p.journal_name);
+    });
+    return Array.from(suggestions).slice(0, 5); // Max 5 suggestions
+  };
+  const suggestions = getSuggestions();
 
   return (
     <div className="dashboard-layout">
@@ -301,7 +327,7 @@ export default function PublicationsPage() {
 
             {/* Table Section */}
             <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl rounded-[2rem] overflow-hidden">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 md:p-8 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/20">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 md:p-8 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/20 gap-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400">
                     <BookOpen className="w-5 h-5" />
@@ -313,90 +339,131 @@ export default function PublicationsPage() {
                     <p className="text-sm text-slate-500 font-medium mt-0.5">Manage existing records in the database.</p>
                   </div>
                 </div>
-                {loadingPapers && (
-                  <span className="mt-4 sm:mt-0 inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1.5 rounded-full animate-pulse">
-                     <div className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" /> Updating...
-                  </span>
-                )}
+                
+                <div className="flex flex-col w-full sm:w-auto gap-3 sm:flex-row sm:items-center">
+                  {/* Search / Filter Box */}
+                  <div className="relative w-full sm:w-72">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Search topics, titles, DOI..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onFocus={() => setIsSearchFocused(true)}
+                        onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                        className="w-full pl-9 pr-4 py-2.5 text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700/60 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all placeholder:text-slate-400 text-slate-900 dark:text-white shadow-sm"
+                      />
+                    </div>
+                    
+                    {/* Suggestions Dropdown */}
+                    {isSearchFocused && suggestions.length > 0 && (
+                      <div className="absolute mt-2 left-0 right-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-20 overflow-hidden py-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {suggestions.map((sug, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setSearchTerm(sug);
+                              setIsSearchFocused(false);
+                            }}
+                            className="w-full text-left px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors flex items-center gap-2"
+                          >
+                            <Search className="w-3 h-3 opacity-50 shrink-0" />
+                            <span className="truncate">{sug}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {loadingPapers && (
+                    <span className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-2 rounded-xl animate-pulse whitespace-nowrap">
+                       <div className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" /> Updating...
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full text-left text-xs md:text-sm">
-                  <thead className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400">
+                <table className="min-w-full text-left text-xs md:text-sm border-collapse">
+                  <thead className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-md">
                     <tr>
-                      <th className="py-2 pr-3 font-medium">Title</th>
-                      <th className="py-2 px-3 font-medium">Journal / Year</th>
-                      <th className="py-2 px-3 font-medium">DOI</th>
-                      <th className="py-2 px-3 font-medium text-right">
+                      <th className="py-4 px-4 pl-6 font-semibold uppercase tracking-wider text-[11px]">Title</th>
+                      <th className="py-4 px-4 font-semibold uppercase tracking-wider text-[11px]">Journal / Year</th>
+                      <th className="py-4 px-4 font-semibold uppercase tracking-wider text-[11px]">DOI</th>
+                      <th className="py-4 px-4 font-semibold uppercase tracking-wider text-[11px] text-right">
                         Citations
                       </th>
                       {canManage && (
-                        <th className="py-2 pl-3 text-right font-medium">
+                        <th className="py-4 pl-4 pr-6 text-right font-semibold uppercase tracking-wider text-[11px]">
                           Actions
                         </th>
                       )}
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                     {loadingPapers
                       ? Array.from({ length: 3 }).map((_, idx) => (
-                          <tr key={idx} className="border-b border-slate-100 dark:border-slate-800">
-                            <td className="py-2 pr-3">
-                              <div className="h-4 w-40 rounded bg-slate-100 dark:bg-slate-800 animate-pulse" />
+                          <tr key={idx}>
+                            <td className="py-5 px-4 pl-6">
+                              <div className="h-5 w-40 rounded bg-slate-100 dark:bg-slate-800 animate-pulse mb-2" />
+                              <div className="h-3 w-64 rounded bg-slate-100 dark:bg-slate-800 animate-pulse" />
                             </td>
-                            <td className="py-2 px-3">
+                            <td className="py-5 px-4">
                               <div className="h-4 w-32 rounded bg-slate-100 dark:bg-slate-800 animate-pulse" />
                             </td>
-                            <td className="py-2 px-3">
+                            <td className="py-5 px-4">
                               <div className="h-4 w-28 rounded bg-slate-100 dark:bg-slate-800 animate-pulse" />
                             </td>
-                            <td className="py-2 px-3 text-right">
+                            <td className="py-5 px-4 text-right">
                               <div className="h-4 w-10 ml-auto rounded bg-slate-100 dark:bg-slate-800 animate-pulse" />
                             </td>
                             {canManage && (
-                              <td className="py-2 pl-3 text-right">
+                              <td className="py-5 pl-4 pr-6 text-right">
                                 <div className="h-4 w-16 ml-auto rounded bg-slate-100 dark:bg-slate-800 animate-pulse" />
                               </td>
                             )}
                           </tr>
                         ))
-                      : papers.map((paper) => (
+                      : filteredPapers.map((paper) => (
                           <tr
                             key={paper.paper_id}
-                            className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/60 dark:hover:bg-slate-900/60 transition-colors"
+                            className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 backdrop-blur-sm transition-all duration-300"
                           >
-                            <td className="py-2 pr-3 align-top">
-                              <Link href={`/publications/${paper.paper_id}`} className="font-medium text-slate-900 dark:text-slate-50 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                            <td className="py-5 px-4 pl-6 align-top">
+                              <Link href={`/publications/${paper.paper_id}`} className="font-semibold text-slate-900 dark:text-slate-50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-sm md:text-base">
                                 {paper.title}
                               </Link>
                               {paper.abstract && (
-                                <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                                <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 max-w-2xl leading-relaxed">
                                   {paper.abstract}
                                 </p>
                               )}
                             </td>
-                            <td className="py-2 px-3 align-top text-slate-600 dark:text-slate-300">
-                              <p className="text-xs md:text-sm">
+                            <td className="py-5 px-4 align-top text-slate-600 dark:text-slate-300">
+                              <p className="text-sm font-medium">
                                 {paper.journal_name || '—'}
                               </p>
-                              <p className="text-[11px] text-slate-400">
+                              <p className="text-xs text-slate-500 mt-1">
                                 {paper.year}
                               </p>
                             </td>
-                            <td className="py-2 px-3 align-top text-slate-600 dark:text-slate-300">
-                              <span className="text-[11px] md:text-xs font-mono">
+                            <td className="py-5 px-4 align-top text-slate-600 dark:text-slate-300">
+                              <span className="text-xs font-mono bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">
                                 {paper.doi || '—'}
                               </span>
                             </td>
-                            <td className="py-2 px-3 align-top text-right text-slate-900 dark:text-slate-50">
+                            <td className="py-5 px-4 align-top text-right text-slate-900 dark:text-slate-50 font-semibold">
                               {paper.citation_count ?? 0}
                             </td>
                             {canManage && (
-                              <td className="py-2 pl-3 align-top text-right">
-                                <div className="inline-flex gap-1.5">
+                              <td className="py-5 pl-4 pr-6 align-top text-right">
+                                <div className="inline-flex gap-2 xl:opacity-0 xl:group-hover:opacity-100 transition-opacity duration-300">
                                   <button
                                     type="button"
                                     onClick={() => handleEdit(paper)}
-                                    className="inline-flex items-center px-2 py-1 text-[11px] font-medium rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700"
+                                    className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors shadow-sm"
                                   >
                                     Edit
                                   </button>
@@ -404,7 +471,7 @@ export default function PublicationsPage() {
                                     <button
                                       type="button"
                                       onClick={() => handleDelete(paper.paper_id)}
-                                      className="inline-flex items-center px-2 py-1 text-[11px] font-medium rounded-full bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/70"
+                                      className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors shadow-sm"
                                     >
                                       Delete
                                     </button>
@@ -414,13 +481,16 @@ export default function PublicationsPage() {
                             )}
                           </tr>
                         ))}
-                    {!loadingPapers && papers.length === 0 && (
+                    {!loadingPapers && filteredPapers.length === 0 && (
                       <tr>
                         <td
                           colSpan={canManage ? 5 : 4}
-                          className="py-4 text-sm text-slate-500 dark:text-slate-400 text-center"
+                          className="py-12 text-sm text-slate-500 dark:text-slate-400 text-center bg-slate-50/50 dark:bg-slate-900/20"
                         >
-                          No publications found.
+                          <div className="flex flex-col items-center justify-center">
+                            <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
+                            No publications match your filter.
+                          </div>
                         </td>
                       </tr>
                     )}
@@ -430,6 +500,7 @@ export default function PublicationsPage() {
             </section>
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );

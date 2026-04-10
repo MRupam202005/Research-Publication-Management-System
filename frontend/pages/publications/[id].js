@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/context/AuthContext';
 import { getPaperById } from '@/services/paperService';
@@ -177,6 +178,7 @@ export default function PublicationDetail() {
             ) : null}
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );

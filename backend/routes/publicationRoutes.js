@@ -17,7 +17,7 @@ router.get('/:id', authenticate, getPublicationHandler);
 router.post(
   '/',
   authenticate,
-  authorizeRoles('Researcher', 'Administrator'),
+  authorizeRoles('Researcher', 'Administrator', 'Librarian'),
   validatePublication,
   createPublicationHandler,
 );
@@ -25,14 +25,14 @@ router.post(
 router.put(
   '/:id',
   authenticate,
-  authorizeRoles('Researcher', 'Administrator'),
+  authorizeRoles('Researcher', 'Administrator', 'Librarian'),
   updatePublicationHandler,
 );
 
 router.delete(
   '/:id',
   authenticate,
-  authorizeRoles('Administrator'),
+  authorizeRoles('Administrator', 'Librarian'),
   deletePublicationHandler,
 );
 

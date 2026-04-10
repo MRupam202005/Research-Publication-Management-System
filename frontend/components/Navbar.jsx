@@ -56,7 +56,7 @@ const Navbar = () => {
 
       {user && (
         <nav className="hidden md:flex items-center gap-1 xl:gap-2">
-          {navItems.map(item => {
+          {navItems.filter(item => item.href !== '/dataset' || ['Administrator', 'Librarian'].includes(user?.role)).map(item => {
             const isActive = router.pathname === item.href;
             return (
               <Link 

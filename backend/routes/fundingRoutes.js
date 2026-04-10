@@ -10,8 +10,8 @@ const {
 const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
 
 router.get('/', authenticate, listAgencies);
-router.post('/', authenticate, authorizeRoles('Administrator', 'Department'), createAgency);
-router.post('/assign', authenticate, authorizeRoles('Administrator', 'Department'), assignFunding);
+router.post('/', authenticate, authorizeRoles('Administrator'), createAgency);
+router.post('/assign', authenticate, authorizeRoles('Administrator'), assignFunding);
 router.get('/report', authenticate, fundingReport);
 router.get('/:id/papers', authenticate, listAgencyPapers);
 

@@ -1,0 +1,4 @@
+title,doi,publication_year,journal,conference,keywords,authors
+"Deep Learning for AI","10.1000/182",2023,"Journal of AI","","AI, Deep Learning","John Doe, Jane Smith"
+"Modern Databases","10.1000/183",2022,"","SIGMOD","Database, SQL","Alice Brown"
+"Quantum Computing Advances","10.1000/184",2024,"Nature Quantum","","Quantum, Computing","Bob White, Charlie Green"

@@ -6,7 +6,7 @@ const { authenticate, authorizeRoles } = require('../middleware/authMiddleware')
 
 const upload = multer({ dest: '../tmp/' });
 
-// Allow Admin, Department, Librarian, and Researcher to upload datasets
-router.post('/upload', authenticate, authorizeRoles('Administrator', 'Department', 'Researcher', 'Librarian'), upload.single('file'), uploadDataset);
+// Allow Admin and Librarian to upload datasets
+router.post('/upload', authenticate, authorizeRoles('Administrator', 'Librarian'), upload.single('file'), uploadDataset);
 
 module.exports = router;

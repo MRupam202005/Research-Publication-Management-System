@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import { SimpleBarChart } from '@/components/AnalyticsChart';
 import { useAuth } from '@/context/AuthContext';
@@ -12,7 +13,7 @@ export default function FundingPage() {
   const { user, token, loading } = useAuth();
   const router = useRouter();
 
-  const canManage = user && ['Department', 'Administrator'].includes(user.role);
+  const canManage = user && ['Administrator'].includes(user.role);
   
   const [agencies, setAgencies] = useState([]);
   const [report, setReport] = useState([]);
@@ -234,6 +235,7 @@ export default function FundingPage() {
 
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );

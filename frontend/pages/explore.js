@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import { useAuth } from '@/context/AuthContext';
 import { Search, ExternalLink, Download, Plus } from 'lucide-react';
@@ -251,6 +252,7 @@ export default function ExplorePage() {
             )}
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );

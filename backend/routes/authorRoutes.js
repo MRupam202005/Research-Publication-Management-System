@@ -20,21 +20,21 @@ router.get('/:id/recommendations', authenticate, getCollaborationRecommendations
 router.post(
   '/',
   authenticate,
-  authorizeRoles('Department', 'Administrator'),
+  authorizeRoles('Administrator', 'Librarian'),
   createAuthorHandler,
 );
 
 router.put(
   '/:id',
   authenticate,
-  authorizeRoles('Department', 'Administrator'),
+  authorizeRoles('Administrator', 'Librarian'),
   updateAuthorHandler,
 );
 
 router.delete(
   '/:id',
   authenticate,
-  authorizeRoles('Administrator'),
+  authorizeRoles('Administrator', 'Librarian'),
   deleteAuthorHandler,
 );
 

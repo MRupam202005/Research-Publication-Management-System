@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Network, Database, LineChart, ChevronRight, Users, BookOpen, Globe, Github, Twitter, Linkedin } from 'lucide-react';
 
-const ROLES = ['Researcher', 'Administrator', 'Department', 'Funding Agency'];
+const ROLES = ['Researcher', 'Administrator', 'Librarian'];
 
 const FEATURES = [
   {
