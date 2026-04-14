@@ -129,67 +129,81 @@ Open `http://localhost:3000` in your browser. You can log in using the mock data
 ```
 
 ## Entity Relationships Diagram
-
 ```mermaid
 erDiagram
-    users {
+    USERS {
         int id PK
         varchar name
         varchar email
+        varchar password
         varchar role
+        timestamp created_at
     }
-    
-    journals {
+
+    AUTHORS {
+        int author_id PK
+        varchar name
+        varchar orcid
+        varchar affiliation
+        varchar department
+        varchar email
+        text research_interests
+    }
+
+    JOURNALS {
         int journal_id PK
         varchar name
         varchar publisher
     }
 
-    papers {
+    PAPERS {
         int paper_id PK
         varchar title
+        text abstract
         varchar doi
         int publication_year
         int journal_id FK
+        varchar journal
+        varchar conference
+        text keywords
+        varchar pdf_url
     }
 
-    authors {
-        int author_id PK
-        varchar name
-        varchar orcid
-        varchar affiliation
+    PAPERAUTHORS {
+        int paper_id PK,FK
+        int author_id PK,FK
     }
 
-    paperauthors {
-        int paper_id FK
-        int author_id FK
-    }
-
-    citations {
+    CITATIONS {
         int citation_id PK
         int citing_paper_id FK
         int cited_paper_id FK
     }
 
-    funding_agencies {
+    FUNDING_AGENCIES {
         int agency_id PK
         varchar name
         varchar type
+        varchar location
     }
 
-    paper_funding {
-        int paper_id FK
-        int agency_id FK
+    PAPER_FUNDING {
+        int paper_id PK,FK
+        int agency_id PK,FK
         decimal amount
         varchar grant_number
     }
 
-    journals ||--o{ papers : "publishes"
-    papers ||--o{ paperauthors : "written by"
-    authors ||--o{ paperauthors : "writes"
-    papers ||--o{ citations : "cites"
-    papers ||--o{ citations : "is cited by"
-    papers ||--o{ paper_funding : "funded by"
-    funding_agencies ||--o{ paper_funding : "funds"
+    %% Relationships
+    JOURNALS ||--o{ PAPERS : "publishes"
+    
+    PAPERS ||--o{ PAPERAUTHORS : "has"
+    AUTHORS ||--o{ PAPERAUTHORS : "writes"
+    
+    PAPERS ||--o{ CITATIONS : "cites"
+    PAPERS ||--o{ CITATIONS : "is cited by"
+    
+    PAPERS ||--o{ PAPER_FUNDING : "funded via"
+    FUNDING_AGENCIES ||--o{ PAPER_FUNDING : "provides"
 ```
 
