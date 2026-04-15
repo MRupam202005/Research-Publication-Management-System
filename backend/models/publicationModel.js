@@ -1,5 +1,10 @@
 const { query } = require('../config/db');
 
+// Retrieves publications with optional filtering (keyword and year).
+// Uses LEFT JOINs to fetch associated journal information (from 'journals' table)
+// and to aggregate citation counts (from 'citations' table).
+// LEFT JOIN ensures that even if a paper has NO journal or NO citations, it is still retrieved.
+// The subquery 'c' groups and counts citations for a paper (Aggregate Function).
 const getAllPublications = async (keyword, year) => {
   let baseQuery = `
     SELECT p.paper_id,
@@ -27,6 +32,7 @@ const getAllPublications = async (keyword, year) => {
   const params = [];
   const conditions = [];
 
+  // Dynamic parameterized query building for search criteria.
   if (keyword) {
     params.push(`%${keyword}%`);
     conditions.push(`(p.title ILIKE $${params.length} OR p.abstract ILIKE $${params.length} OR p.keywords ILIKE $${params.length})`);
@@ -47,6 +53,9 @@ const getAllPublications = async (keyword, year) => {
   return result.rows;
 };
 
+// Fetches a single publication by ID along with its journal details.
+// Database Normalization (3NF) states that non-key attributes must depend only on the primary key.
+// Instead of storing journal_name in 'papers', we store journal_id and look it up here via JOIN.
 const getPublicationById = async (paperId) => {
   const result = await query(
     `SELECT p.paper_id,
@@ -118,9 +127,14 @@ const updatePublication = async (paperId, {
   return result.rows[0];
 };
 
+// Deletes a publication and cleans up dependent records.
+// This is required to maintain Referential Integrity if ON DELETE CASCADE is not set on the foreign keys.
 const deletePublication = async (paperId) => {
+  // First, delete tracking records in related bridging tables.
   await query('DELETE FROM citations WHERE citing_paper_id = $1 OR cited_paper_id = $1', [paperId]);
   await query('DELETE FROM paperauthors WHERE paper_id = $1', [paperId]);
+  
+  // Finally, delete the actual parent record.
   await query('DELETE FROM papers WHERE paper_id = $1', [paperId]);
 };
 

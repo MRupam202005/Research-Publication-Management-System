@@ -15,8 +15,11 @@ export default function AuthorsPage() {
   const [authors, setAuthors] = useState([]);
   const [form, setForm] = useState({
     name: '',
-    orcid_id: '',
-    affiliation: ''
+    orcid: '',
+    affiliation: '',
+    department: '',
+    email: '',
+    research_interests: ''
   });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -74,8 +77,11 @@ export default function AuthorsPage() {
       await createAuthor(token, form);
       setForm({
         name: '',
-        orcid_id: '',
-        affiliation: ''
+        orcid: '',
+        affiliation: '',
+        department: '',
+        email: '',
+        research_interests: ''
       });
       await loadAuthors();
     } catch (err) {
@@ -137,7 +143,7 @@ export default function AuthorsPage() {
     return (
       a.name?.toLowerCase().includes(term) ||
       a.affiliation?.toLowerCase().includes(term) ||
-      a.orcid_id?.toLowerCase().includes(term)
+      a.orcid?.toLowerCase().includes(term)
     );
   });
 
@@ -208,31 +214,49 @@ export default function AuthorsPage() {
                 </div>
                 <form
                   onSubmit={handleSubmit}
-                  className="grid grid-cols-1 md:grid-cols-3 gap-5 relative z-10"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 relative z-10"
                 >
-                  <div>
+                  <div className="lg:col-span-3">
                     <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-                      Name
+                      Name *
                     </label>
                     <input
                       name="name"
                       value={form.name}
                       onChange={handleChange}
                       required
+                      placeholder="e.g., Dr. Alan Turing"
                       className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 focus:outline-none transition-all"
                     />
                   </div>
+                  
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                      Email address
+                    </label>
+                    <input
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      placeholder="researcher@university.edu"
+                      className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 focus:outline-none transition-all"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                       ORCID
                     </label>
                     <input
-                      name="orcid_id"
-                      value={form.orcid_id}
+                      name="orcid"
+                      value={form.orcid}
                       onChange={handleChange}
+                      placeholder="0000-0000-0000-0000"
                       className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 focus:outline-none transition-all"
                     />
                   </div>
+
                   <div>
                     <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                       Affiliation
@@ -241,10 +265,38 @@ export default function AuthorsPage() {
                       name="affiliation"
                       value={form.affiliation}
                       onChange={handleChange}
+                      placeholder="e.g., Cambridge University"
                       className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 focus:outline-none transition-all"
                     />
                   </div>
-                  <div className="md:col-span-3 mt-4">
+
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                      Department
+                    </label>
+                    <input
+                      name="department"
+                      value={form.department}
+                      onChange={handleChange}
+                      placeholder="e.g., Computer Science"
+                      className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 focus:outline-none transition-all"
+                    />
+                  </div>
+
+                  <div className="lg:col-span-2">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                      Research Interests
+                    </label>
+                    <input
+                      name="research_interests"
+                      value={form.research_interests}
+                      onChange={handleChange}
+                      placeholder="e.g., AI, Databases, Cryptography"
+                      className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 focus:outline-none transition-all"
+                    />
+                  </div>
+
+                  <div className="lg:col-span-3 mt-4">
                     <button
                       type="submit"
                       disabled={submitting}
@@ -363,7 +415,7 @@ export default function AuthorsPage() {
                             </td>
                             <td className="py-5 px-4 align-middle text-slate-600 dark:text-slate-300">
                               <span className="text-xs font-mono bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded border border-slate-200 dark:border-slate-700">
-                                {author.orcid_id || '—'}
+                                {author.orcid || '—'}
                               </span>
                             </td>
                             <td className="py-5 px-4 pr-6 align-middle text-right">
@@ -511,9 +563,9 @@ export default function AuthorsPage() {
                       <p className="text-slate-600 dark:text-slate-400 mt-1 flex items-center gap-2">
                         {selectedAuthor.affiliation || 'No affiliation recorded'}
                       </p>
-                      {selectedAuthor.orcid_id && (
+                      {selectedAuthor.orcid && (
                         <p className="text-sm font-mono text-indigo-600 dark:text-indigo-400 mt-2 bg-indigo-50 dark:bg-indigo-900/20 inline-flex px-2 py-1 rounded">
-                          ORCID: {selectedAuthor.orcid_id}
+                          ORCID: {selectedAuthor.orcid}
                         </p>
                       )}
                     </div>

@@ -2,7 +2,9 @@ const fs = require('fs');
 const fastcsv = require('fast-csv');
 const { query } = require('../config/db');
 
-// Helper to find or create an author
+// Helper: Implements the 'Upsert' logic manually for an Author.
+// Data Flow Step 2a: Checks if the author already exists in the 3NF authors table.
+// If not, it INSERTS the new atomic author record.
 const findOrCreateAuthor = async (name) => {
   const existing = await query('SELECT author_id FROM authors WHERE name = $1 LIMIT 1', [name]);
   if (existing.rows.length > 0) return existing.rows[0].author_id;
@@ -10,7 +12,8 @@ const findOrCreateAuthor = async (name) => {
   return res.rows[0].author_id;
 };
 
-// Helper to find or create a paper
+// Helper: Checks for an existing paper by title, otherwise inserts.
+// Data Flow Step 1: Extracts flat CSV row data and isolates 'papers' table attributes.
 const findOrCreatePaper = async (row) => {
   const { title, doi, publication_year, journal, conference, keywords } = row;
   const existing = await query('SELECT paper_id FROM papers WHERE title = $1 LIMIT 1', [title]);
@@ -24,7 +27,9 @@ const findOrCreatePaper = async (row) => {
   return res.rows[0].paper_id;
 };
 
-// Link author to paper
+// Data Flow Step 2b: Resolves Many-to-Many relationship (Normalization).
+// Instead of storing comma-separated authors in the papers table (which violates 1NF),
+// this maps the specific paper_id to the specific author_id in the bridging table 'paperauthors'.
 const linkAuthorToPaper = async (paperId, authorId) => {
   const existing = await query('SELECT * FROM paperauthors WHERE paper_id = $1 AND author_id = $2', [paperId, authorId]);
   if (existing.rows.length === 0) {

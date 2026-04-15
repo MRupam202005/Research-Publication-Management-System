@@ -1,3 +1,12 @@
+/**
+ * ANALYTICS CONTROLLER
+ * 
+ * Specialized controller for generating "Inference" data.
+ * Data Flow (DB -> Frontend):
+ * 1. Controller calls specialized aggregate models.
+ * 2. SQL queries use COUNT, SUM, AVG, and GROUP BY to generate metrics.
+ * 3. Resulting metrics (H-index, Citation trends) are sent back to power the Frontend Dashboard.
+ */
 const {
   getCitationCountsPerPaper,
   getDepartmentPublicationStats,

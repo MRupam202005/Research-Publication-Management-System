@@ -22,7 +22,11 @@ export default function PublicationsPage() {
     abstract: '',
     doi: '',
     year: '',
-    journal_id: ''
+    journal_id: '',
+    journal: '',
+    conference: '',
+    keywords: '',
+    pdf_url: ''
   });
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
@@ -94,7 +98,11 @@ export default function PublicationsPage() {
       abstract: '',
       doi: '',
       year: '',
-      journal_id: ''
+      journal_id: '',
+      journal: '',
+      conference: '',
+      keywords: '',
+      pdf_url: ''
     });
     setEditingId(null);
   };
@@ -130,8 +138,12 @@ export default function PublicationsPage() {
       title: paper.title || '',
       abstract: paper.abstract || '',
       doi: paper.doi || '',
-      year: paper.year?.toString() || '',
-      journal_id: paper.journal_id?.toString() || ''
+      year: paper.publication_year?.toString() || paper.year?.toString() || '',
+      journal_id: paper.journal_id?.toString() || '',
+      journal: paper.journal || '',
+      conference: paper.conference || '',
+      keywords: paper.keywords || '',
+      pdf_url: paper.pdf_url || ''
     });
   };
 
@@ -299,7 +311,56 @@ export default function PublicationsPage() {
                       className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
                     />
                   </div>
-                  <div className="flex items-center gap-4 mt-6">
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                      Journal Name
+                    </label>
+                    <input
+                      name="journal"
+                      value={form.journal}
+                      onChange={handleChange}
+                      placeholder="e.g., Nature"
+                      className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                      Conference
+                    </label>
+                    <input
+                      name="conference"
+                      value={form.conference}
+                      onChange={handleChange}
+                      placeholder="e.g., NeurIPS 2024"
+                      className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                      Keywords
+                    </label>
+                    <input
+                      name="keywords"
+                      value={form.keywords}
+                      onChange={handleChange}
+                      placeholder="e.g., AI, ML, Neural Networks"
+                      className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                      PDF URL
+                    </label>
+                    <input
+                      name="pdf_url"
+                      type="url"
+                      value={form.pdf_url}
+                      onChange={handleChange}
+                      placeholder="https://example.com/paper.pdf"
+                      className="block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-50 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 focus:outline-none transition-all"
+                    />
+                  </div>
+                  <div className="md:col-span-2 flex items-center gap-4 mt-6">
                     <button
                       type="submit"
                       disabled={submitting}

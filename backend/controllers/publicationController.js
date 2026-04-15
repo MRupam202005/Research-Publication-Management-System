@@ -1,3 +1,9 @@
+/**
+ * PUBLICATION CONTROLLER
+ * 
+ * This controller handles the lifecycle of Research Papers/Publications.
+ * It manages searching (filtering by year/keywords) and schema-compliant data insertion.
+ */
 const {
   getAllPublications,
   getPublicationById,
@@ -6,6 +12,14 @@ const {
   deletePublication,
 } = require('../models/publicationModel');
 
+/**
+ * DATA RETRIEVAL WITH DYNAMIC FILTERING
+ * 1. Frontend sends GET /api/publications?year=2024&keyword=AI
+ * 2. Controller extracts query params (req.query).
+ * 3. Model builds a dynamic SQL query using JOINs to count citations from the 'citations' table.
+ * 4. DB executes the query: SELECT p.*, COUNT(c.id) FROM papers JOIN citations...
+ * 5. Aggregated results are sent back as JSON for the Frontend table view.
+ */
 const listPublications = async (req, res, next) => {
   try {
     const { keyword, year } = req.query;
@@ -16,6 +30,13 @@ const listPublications = async (req, res, next) => {
   }
 };
 
+/**
+ * SCHEMA-DRIVEN DATA INSERTION
+ * 1. Frontend submits a Multi-field form (Title, Abstract, DOI, Journals, etc.)
+ * 2. Controller decomposes 'req.body' into specific schema attributes.
+ * 3. Model performs an INSERT INTO papers ($1, $2, ...)
+ * 4. This maintains Referential Integrity as mandatory fields (Title, Year) are enforced here.
+ */
 const createPublicationHandler = async (req, res, next) => {
   try {
     const {

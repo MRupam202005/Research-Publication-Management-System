@@ -1,7 +1,19 @@
+/**
+ * AUTHENTICATION CONTROLLER
+ * 
+ * Handles User Access Control (RBAC).
+ * Data Flow: Frontend -> API (Hasing/JWT) -> DB.
+ */
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { createUser, findUserByEmail } = require('../models/userModel');
 
+/**
+ * TOKEN GENERATION
+ * Creates a signed JWT containing user metadata (ID, Role, Name).
+ * This token is stored in the Frontend (localStorage) and sent in the 
+ * Authorization header for all subsequent protected API calls.
+ */
 const generateToken = (user) =>
   jwt.sign(
     {
@@ -14,6 +26,14 @@ const generateToken = (user) =>
     { expiresIn: '8h' },
   );
 
+/**
+ * USER REGISTRATION FLOW
+ * 1. Frontend sends Name, Email, Password, Role.
+ * 2. API checks if Email already exists in DB (SELECT query).
+ * 3. Password is salt-hashed using Bcrypt for security (never store raw passwords).
+ * 4. User record is INSERTED specifically into the 'users' table.
+ * 5. Success returns a JWT so the user is "logged in" immediately.
+ */
 const register = async (req, res, next) => {
   try {
     const {
@@ -50,6 +70,13 @@ const register = async (req, res, next) => {
   }
 };
 
+/**
+ * USER LOGIN FLOW
+ * 1. Frontend sends Email and Password.
+ * 2. API fetches the user by email (findUserByEmail).
+ * 3. Password comparison: Bcrypt compares the input with the stored Hash.
+ * 4. If match, a new JWT is generated and returned to the client.
+ */
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;

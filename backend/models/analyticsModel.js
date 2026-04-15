@@ -1,5 +1,8 @@
 const { query } = require('../config/db');
 
+// Analytics Query: Calculates total citations per paper.
+// Uses an Aggregate Function (COUNT) with a GROUP BY clause.
+// It LEFT JOINs citations to ensure papers with 0 citations are still included in the result.
 const getCitationCountsPerPaper = async () => {
   const result = await query(
     `SELECT p.paper_id,
@@ -60,6 +63,9 @@ const getAuthorAnalyticsData = async (authorId) => {
   return result.rows;
 };
 
+// Self-join / Complex join query: Finds 'Self Citations'.
+// Navigates the citing paper's authors and the cited paper's authors.
+// Validates if the exact same author ID is present in both groups for the same citation link.
 const getSelfCitations = async (authorId) => {
   const result = await query(
     `SELECT c.citation_id,

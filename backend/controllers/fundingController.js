@@ -1,3 +1,9 @@
+/**
+ * FUNDING CONTROLLER
+ * 
+ * Manages the Many-to-Many (M:N) relationship between Publications and Funding Agencies.
+ * This is crucial for tracking which research grants sponsored which papers.
+ */
 const {
   getAllFundingAgencies,
   createFundingAgency,
@@ -6,6 +12,12 @@ const {
   getFundingSummary,
 } = require('../models/fundingModel');
 
+/**
+ * DATA RETRIEVAL: FETCHING SYSTEM ENTITIES
+ * 1. Frontend requests available funding agencies (DB -> Frontend).
+ * 2. Controller retrieves raw rows from 'funding_agencies' table.
+ * 3. These are used in the UI to populate selection dropdowns for linking.
+ */
 const listAgencies = async (req, res, next) => {
   try {
     const agencies = await getAllFundingAgencies();
@@ -15,6 +27,11 @@ const listAgencies = async (req, res, next) => {
   }
 };
 
+/**
+ * DATA PERSISTENCE: CREATING NEW ENTITIES
+ * 1. Frontend submits Name, Type, Location for a new sponsor.
+ * 2. Model performs INSERT INTO funding_agencies.
+ */
 const createAgency = async (req, res, next) => {
   try {
     const { name, type, location } = req.body;
@@ -28,6 +45,12 @@ const createAgency = async (req, res, next) => {
   }
 };
 
+/**
+ * BRIDGING TABLE DATA FLOW (Frontend -> DB)
+ * 1. User selects a Paper and an Agency in the Frontend.
+ * 2. Data is sent to this handler to link them in the 'paper_funding' bridging table.
+ * 3. This resolves the Many-to-Many relationship (3NF Compliance).
+ */
 const assignFunding = async (req, res, next) => {
   try {
     const { paperId, agencyId, amount, grantNumber } = req.body;
@@ -51,6 +74,12 @@ const listAgencyPapers = async (req, res, next) => {
   }
 };
 
+/**
+ * DATA ANALYTICS FLOW: FUNDING REPORT
+ * 1. Controller calls 'getFundingSummary'.
+ * 2. Database uses Aggregation (SUM, COUNT, LEFT JOIN) to calculate totals.
+ * 3. Results are sent to the Frontend to render the "Funding Distribution" Bar Chart.
+ */
 const fundingReport = async (req, res, next) => {
   try {
     const summary = await getFundingSummary();

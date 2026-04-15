@@ -1,3 +1,9 @@
+/**
+ * AUTHOR CONTROLLER
+ * 
+ * This controller manages the flow of data for Research Authors (Researchers).
+ * It acts as the bridge between the Frontend (React/Next.js) and the Database (PostgreSQL).
+ */
 const {
   getAllAuthors,
   getAuthorById,
@@ -9,6 +15,14 @@ const {
   suggestCollaborations,
 } = require('../models/authorModel');
 
+/**
+ * DATA RETRIEVAL FLOW (DB -> Frontend)
+ * 1. Frontend sends a GET request to /api/authors
+ * 2. Controller calls the Model 'getAllAuthors' which executes: SELECT * FROM authors
+ * 3. Database returns rows to the Model.
+ * 4. Model returns array of objects to the Controller.
+ * 5. Controller sends a JSON response back to the Frontend.
+ */
 const listAuthors = async (req, res, next) => {
   try {
     const authors = await getAllAuthors();
@@ -31,6 +45,16 @@ const getAuthor = async (req, res, next) => {
   }
 };
 
+/**
+ * DATA PERSISTENCE FLOW (Frontend -> DB)
+ * 1. Frontend sends a POST request with Author details in JSON format (req.body).
+ * 2. Controller extracts name, orcid, affiliation, etc. from req.body.
+ * 3. Basic validation is performed (e.g., ensuring Name is present).
+ * 4. Controller calls the Model 'createAuthor' with the sanitized data.
+ * 5. Model uses Parameterized Queries (to prevent SQL Injection) to INSERT data into 'authors' table.
+ * 6. Database returns the newly created Record.
+ * 7. Controller returns 201 Created with the new Author object to the Frontend.
+ */
 const createAuthorHandler = async (req, res, next) => {
   try {
     const {

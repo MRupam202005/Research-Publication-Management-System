@@ -1,5 +1,7 @@
 const { query } = require('../config/db');
 
+// Retrieves all authors from the 'authors' table.
+// This table is in 1st Normal Form (1NF) as each attribute contains atomic values (e.g., no comma-separated lists of interests).
 const getAllAuthors = async () => {
   const result = await query(
     `SELECT a.author_id,
@@ -31,11 +33,14 @@ const getAuthorById = async (authorId) => {
   return result.rows[0];
 };
 
+// Inserts a new author into the database.
+// Uses parameterized queries ($1, $2, etc.) to prevent SQL Injection attacks.
 const createAuthor = async ({ name, orcid, affiliation, department, email, research_interests }) => {
   const result = await query(
     `INSERT INTO authors (name, orcid, affiliation, department, email, research_interests)
      VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING author_id, name, orcid, affiliation, department, email, research_interests`,
+  // The RETURNING clause immediately fetches the generated author_id without a second SELECT query.
     [name, orcid, affiliation, department, email, research_interests],
   );
   return result.rows[0];
@@ -61,6 +66,10 @@ const deleteAuthor = async (authorId) => {
   await query('DELETE FROM authors WHERE author_id = $1', [authorId]);
 };
 
+// Fetches all publications authored by a specific author.
+// This query demonstrates a Many-to-Many relationship resolution.
+// It JOINs the primary 'papers' table with the bridging 'paperauthors' table.
+// 'paperauthors' stores (paper_id, author_id) eliminating data redundancy (3NF).
 const getPublicationsByAuthor = async (authorId) => {
   const result = await query(
     `SELECT p.paper_id,
@@ -94,6 +103,10 @@ const getCoauthorNetwork = async () => {
   return result.rows;
 };
 
+// Complex Subquery / CTE (Common Table Expression).
+// Finds mutual coauthors to suggest new collaborations.
+// Uses a WITH clause (CTE) 'direct_coauthors' to first find everyone the author has directly worked with.
+// Then it queries for authors who have worked with those direct connections, but NOT the author themselves.
 const suggestCollaborations = async (authorId) => {
   const result = await query(
     `WITH direct_coauthors AS (
