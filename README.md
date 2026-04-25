@@ -14,6 +14,7 @@ This platform is divided into several core modules that help institutions organi
 - **Funding & Grants**: Allows administrators to register funding agencies (e.g., NSF, Google Research) and assign financial grants to specific papers. Includes a visual chart for funding distribution.
 - **Analytics Dashboard**: Computes complex academic metrics on-the-fly, including **h-index**, **i10-index**, and total citation breakdowns via raw SQL queries.
 - **Explore (OpenAlex Integration)**: Search for external papers and global publications using the public [OpenAlex API](https://openalex.org/).
+- **DBMS Educational Logic**: Detailed explanation of [Normalization, 3NF, and Data Decommissioning](file:///c:/Users/Rupam/Desktop/NOTES/4TH%20SEMESTER/DBMS/Project1/research-publication-system/docs/DATABASE_LOGIC.md) used in the system.
 
 ### 🛡️ Role-Based Access Control (RBAC)
 
