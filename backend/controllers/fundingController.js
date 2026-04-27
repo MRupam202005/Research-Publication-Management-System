@@ -6,6 +6,7 @@
  */
 const {
   getAllFundingAgencies,
+  checkAgencyExists,
   createFundingAgency,
   linkPaperToFunding,
   getPapersByFunding,
@@ -38,6 +39,13 @@ const createAgency = async (req, res, next) => {
     if (!name) {
       return res.status(400).json({ message: 'Agency name is required' });
     }
+    
+    // 3NF INTEGRITY CHECK: Prevent duplicate funding agencies
+    const exists = await checkAgencyExists(name);
+    if (exists) {
+      return res.status(409).json({ message: `A funding agency named '${name}' already exists in the database.` });
+    }
+
     const agency = await createFundingAgency({ name, type, location });
     res.status(201).json(agency);
   } catch (err) {

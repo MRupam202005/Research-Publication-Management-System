@@ -13,6 +13,7 @@ const {
   getPublicationsByAuthor,
   getCoauthorNetwork,
   suggestCollaborations,
+  checkAuthorExists,
 } = require('../models/authorModel');
 
 /**
@@ -68,6 +69,11 @@ const createAuthorHandler = async (req, res, next) => {
 
     if (!name) {
       return res.status(400).json({ message: 'Name is required' });
+    }
+
+    const exists = await checkAuthorExists(name, orcid);
+    if (exists) {
+      return res.status(409).json({ message: 'An author with this name or ORCID already exists' });
     }
 
     const author = await createAuthor({

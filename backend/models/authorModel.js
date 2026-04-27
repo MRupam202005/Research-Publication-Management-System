@@ -33,6 +33,15 @@ const getAuthorById = async (authorId) => {
   return result.rows[0];
 };
 
+const checkAuthorExists = async (name, orcid) => {
+  if (orcid) {
+    const res = await query('SELECT author_id FROM authors WHERE orcid = $1 LIMIT 1', [orcid]);
+    if (res.rows.length > 0) return true;
+  }
+  const res = await query('SELECT author_id FROM authors WHERE name = $1 LIMIT 1', [name]);
+  return res.rows.length > 0;
+};
+
 // Inserts a new author into the database.
 // Uses parameterized queries ($1, $2, etc.) to prevent SQL Injection attacks.
 const createAuthor = async ({ name, orcid, affiliation, department, email, research_interests }) => {
@@ -139,5 +148,6 @@ module.exports = {
   getPublicationsByAuthor,
   getCoauthorNetwork,
   suggestCollaborations,
+  checkAuthorExists,
 };
 

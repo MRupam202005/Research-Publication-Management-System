@@ -5,9 +5,9 @@ import Footer from '@/components/Footer';
 import Sidebar from '@/components/Sidebar';
 import AuthorCard from '@/components/AuthorCard';
 import { useAuth } from '@/context/AuthContext';
-import { getAuthors, createAuthor, getCollaborationRecommendations } from '@/services/authorService';
+import { getAuthors, createAuthor, getCollaborationRecommendations, deleteAuthor } from '@/services/authorService';
 import { getSelfCitations } from '@/services/analyticsService';
-import { Sparkles, Users, Activity, X, UserPlus, Search } from 'lucide-react';
+import { Sparkles, Users, Activity, X, UserPlus, Search, Trash2 } from 'lucide-react';
 
 export default function AuthorsPage() {
   const { user, token, loading } = useAuth();
@@ -38,6 +38,19 @@ export default function AuthorsPage() {
 
   const canManage =
     user && ['Administrator', 'Librarian'].includes(user.role);
+  const isAdmin = user && user.role === 'Administrator';
+
+  const handleDeleteAuthor = async (authorId, name) => {
+    if (!isAdmin || !token) return;
+    if (confirm(`Are you sure you want to delete ${name}? This will remove them from all associated publications.`)) {
+      try {
+        await deleteAuthor(token, authorId);
+        setAuthors((prev) => prev.filter(a => a.author_id !== authorId));
+      } catch (err) {
+        setError(err?.response?.data?.message || 'Failed to delete author');
+      }
+    }
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -419,16 +432,27 @@ export default function AuthorsPage() {
                               </span>
                             </td>
                             <td className="py-5 px-4 pr-6 align-middle text-right">
-                              <button
-                                onClick={() => handleGetInsights(author)}
-                                disabled={recLoading && selectedAuthor?.author_id === author.author_id}
-                                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50 rounded-lg transition-colors shadow-sm xl:opacity-0 xl:group-hover:opacity-100 transition-opacity duration-300"
-                              >
-                                <Sparkles className="w-4 h-4" />
-                                {recLoading && selectedAuthor?.author_id === author.author_id 
-                                  ? 'Loading...' 
-                                  : 'Explore Insights'}
-                              </button>
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  onClick={() => handleGetInsights(author)}
+                                  disabled={recLoading && selectedAuthor?.author_id === author.author_id}
+                                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50 rounded-lg transition-colors shadow-sm xl:opacity-0 xl:group-hover:opacity-100 transition-opacity duration-300"
+                                >
+                                  <Sparkles className="w-4 h-4" />
+                                  {recLoading && selectedAuthor?.author_id === author.author_id 
+                                    ? 'Loading...' 
+                                    : 'Explore Insights'}
+                                </button>
+                                {isAdmin && (
+                                  <button
+                                    onClick={() => handleDeleteAuthor(author.author_id, author.name)}
+                                    className="p-2 text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-900/30 rounded-lg transition-colors xl:opacity-0 xl:group-hover:opacity-100 transition-opacity duration-300"
+                                    title="Delete Author"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}

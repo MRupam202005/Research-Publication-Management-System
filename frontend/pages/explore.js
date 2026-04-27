@@ -16,7 +16,7 @@ export default function ExplorePage() {
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
 
-  const canManage = user && ['Researcher', 'Administrator'].includes(user.role);
+  const canManage = user && ['Researcher', 'Administrator', 'Librarian'].includes(user.role);
 
   const handleAddPublication = (paper) => {
     sessionStorage.setItem('importPublication', JSON.stringify({

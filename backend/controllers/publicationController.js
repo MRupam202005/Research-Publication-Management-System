@@ -10,6 +10,7 @@ const {
   createPublication,
   updatePublication,
   deletePublication,
+  checkPublicationExists,
 } = require('../models/publicationModel');
 
 /**
@@ -46,6 +47,11 @@ const createPublicationHandler = async (req, res, next) => {
 
     if (!title || !publication_year) {
       return res.status(400).json({ message: 'Title and publication_year are required' });
+    }
+
+    const exists = await checkPublicationExists(title, doi);
+    if (exists) {
+      return res.status(409).json({ message: 'A publication with this title or DOI already exists' });
     }
 
     const publication = await createPublication({

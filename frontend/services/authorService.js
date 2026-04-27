@@ -23,3 +23,8 @@ export const getCollaborationRecommendations = async (token, authorId) => {
   return res.data;
 };
 
+export const deleteAuthor = async (token, authorId) => {
+  const res = await axios.delete(`${API_URL}/authors/${authorId}`, authHeader(token));
+  return res.data;
+};
+

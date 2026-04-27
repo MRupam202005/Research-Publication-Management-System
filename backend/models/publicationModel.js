@@ -78,6 +78,15 @@ const getPublicationById = async (paperId) => {
   return result.rows[0];
 };
 
+const checkPublicationExists = async (title, doi) => {
+  if (doi) {
+    const res = await query('SELECT paper_id FROM papers WHERE doi = $1 LIMIT 1', [doi]);
+    if (res.rows.length > 0) return true;
+  }
+  const res = await query('SELECT paper_id FROM papers WHERE title = $1 LIMIT 1', [title]);
+  return res.rows.length > 0;
+};
+
 const createPublication = async ({
   title,
   abstract,
@@ -144,5 +153,6 @@ module.exports = {
   createPublication,
   updatePublication,
   deletePublication,
+  checkPublicationExists,
 };
 

@@ -16,7 +16,7 @@ const findOrCreateJournal = async (client, name, publisher) => {
   if (existing.rows.length > 0) return existing.rows[0].journal_id;
   const res = await client.query(
     'INSERT INTO journals (name, publisher) VALUES ($1, $2) RETURNING journal_id',
-    [name, publisher || 'Unknown Publisher']
+    [name, publisher || '']
   );
   return res.rows[0].journal_id;
 };
@@ -39,7 +39,7 @@ const findOrCreateAuthor = async (client, data) => {
   const res = await client.query(
     `INSERT INTO authors (name, orcid, affiliation, department, email, research_interests) 
      VALUES ($1, $2, $3, $4, $5, $6) RETURNING author_id`,
-    [name, orcid, affiliation, department, email, interests]
+    [name, orcid || '', affiliation || '', department || '', email || '', interests || '']
   );
   return res.rows[0].author_id;
 };
@@ -51,11 +51,12 @@ const findOrCreateAgency = async (client, name, type, location) => {
   if (existing.rows.length > 0) return existing.rows[0].agency_id;
   const res = await client.query(
     'INSERT INTO funding_agencies (name, type, location) VALUES ($1, $2, $3) RETURNING agency_id',
-    [name, type, location]
+    [name, type || '', location || '']
   );
   return res.rows[0].agency_id;
 };
 
+// Dataset Upload CONTROLLER
 const uploadDataset = async (req, res, next) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
@@ -69,7 +70,8 @@ const uploadDataset = async (req, res, next) => {
       .on('error', error => { throw error; })
       .on('data', row => rows.push(row))
       .on('end', async () => {
-        let importedCount = 0;
+        let newPapersCount = 0;
+        let updatedPapersCount = 0;
         let errors = [];
 
         try {
@@ -77,26 +79,49 @@ const uploadDataset = async (req, res, next) => {
             try {
               await client.query('BEGIN');
 
+              // Strict Validation for Mandatory Fields
+              if (!row.title || !row.publication_year) {
+                throw new Error("Missing mandatory fields: title and publication_year are required.");
+              }
+
               // 1. Resolve Journal
               const journalId = await findOrCreateJournal(client, row.journal_name, row.journal_publisher);
 
-              // 2. Insert Paper
-              const paperRes = await client.query(
-                `INSERT INTO papers (title, abstract, doi, publication_year, journal_id, journal, conference, keywords, pdf_url) 
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING paper_id`,
-                [
-                  row.title, 
-                  row.abstract, 
-                  row.doi, 
-                  parseInt(row.publication_year) || 2024, 
-                  journalId, 
-                  row.journal_name, 
-                  row.conference, 
-                  row.keywords, 
-                  row.pdf_url
-                ]
-              );
-              const paperId = paperRes.rows[0].paper_id;
+              // 2. Resolve/Insert Paper
+              let paperId;
+              let existingPaper;
+              
+              // Check by DOI if available
+              if (row.doi) {
+                existingPaper = await client.query('SELECT paper_id FROM papers WHERE doi = $1 LIMIT 1', [row.doi]);
+              }
+              // Fallback check by Title
+              if (!existingPaper || existingPaper.rows.length === 0) {
+                existingPaper = await client.query('SELECT paper_id FROM papers WHERE title = $1 LIMIT 1', [row.title]);
+              }
+
+              if (existingPaper && existingPaper.rows.length > 0) {
+                paperId = existingPaper.rows[0].paper_id;
+                updatedPapersCount++;
+              } else {
+                const paperRes = await client.query(
+                  `INSERT INTO papers (title, abstract, doi, publication_year, journal_id, journal, conference, keywords, pdf_url) 
+                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING paper_id`,
+                  [
+                    row.title, 
+                    row.abstract || '', 
+                    row.doi || '', 
+                    parseInt(row.publication_year), 
+                    journalId, 
+                    row.journal_name || '', 
+                    row.conference || '', 
+                    row.keywords || '', 
+                    row.pdf_url || ''
+                  ]
+                );
+                paperId = paperRes.rows[0].paper_id;
+                newPapersCount++;
+              }
 
               // 3. Handle Primary Author
               if (row.primary_author_name) {
@@ -124,13 +149,13 @@ const uploadDataset = async (req, res, next) => {
               if (row.funding_agency) {
                 const agencyId = await findOrCreateAgency(client, row.funding_agency, row.funding_type, row.funding_location);
                 await client.query(
-                  'INSERT INTO paper_funding (paper_id, agency_id, amount, grant_number) VALUES ($1, $2, $3, $4)',
-                  [paperId, agencyId, parseFloat(row.funding_amount) || 0, row.grant_number]
+                  'INSERT INTO paper_funding (paper_id, agency_id, amount, grant_number) VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING',
+                  [paperId, agencyId, parseFloat(row.funding_amount) || 0, row.grant_number || '']
                 );
               }
 
               await client.query('COMMIT');
-              importedCount++;
+              // We no longer just use importedCount++
             } catch (innerErr) {
               await client.query('ROLLBACK');
               errors.push({ title: row.title, error: innerErr.message });
@@ -139,8 +164,10 @@ const uploadDataset = async (req, res, next) => {
 
           if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
           res.json({
-            message: `Successfully imported ${importedCount} out of ${rows.length} records.`,
-            successCount: importedCount,
+            message: `Processed ${rows.length} records: ${newPapersCount} new papers added, ${updatedPapersCount} existing papers updated/skipped.`,
+            successCount: newPapersCount + updatedPapersCount,
+            newCount: newPapersCount,
+            updatedCount: updatedPapersCount,
             errorCount: errors.length,
             errors: errors.length > 0 ? errors : undefined
           });

@@ -17,6 +17,14 @@ const getAllFundingAgencies = async () => {
   return result.rows;
 };
 
+const checkAgencyExists = async (name) => {
+  const result = await query(
+    `SELECT agency_id FROM funding_agencies WHERE name ILIKE $1`,
+    [name]
+  );
+  return result.rows.length > 0;
+};
+
 const createFundingAgency = async ({ name, type, location }) => {
   const result = await query(
     `INSERT INTO funding_agencies (name, type, location)
@@ -71,6 +79,7 @@ const getFundingSummary = async () => {
 
 module.exports = {
   getAllFundingAgencies,
+  checkAgencyExists,
   createFundingAgency,
   linkPaperToFunding,
   getPapersByFunding,

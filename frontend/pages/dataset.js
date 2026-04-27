@@ -17,6 +17,7 @@ export default function DatasetImport() {
   // Define allowed roles directly reflecting the backend integration
   const canAccess = user && ['Administrator', 'Librarian'].includes(user.role);
 
+  // file selected button
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -134,10 +135,13 @@ export default function DatasetImport() {
                 <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-12 text-center transition-colors hover:border-indigo-400 dark:hover:border-indigo-600 bg-slate-50 dark:bg-slate-900/50">
                   <UploadCloud className="w-16 h-16 mx-auto text-indigo-400 dark:text-indigo-500 mb-6 drop-shadow-sm" />
                   <h3 className="text-xl text-slate-800 dark:text-slate-100 font-bold mb-2">Select a CSV file to upload</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 max-w-md mx-auto leading-relaxed">
-                    File should ideally contain headers: <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">title</code>, <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">doi</code>, <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">publication_year</code>, <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">journal</code>, <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">conference</code>, <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">keywords</code>, <code className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">authors</code>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 max-w-lg mx-auto leading-relaxed">
+                    Mandatory CSV headers: <code className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-1 py-0.5 rounded text-xs font-bold">title</code>, <code className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-1 py-0.5 rounded text-xs font-bold">publication_year</code>
                   </p>
-                  
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mb-8 max-w-xl mx-auto leading-relaxed">
+                    Optional headers: <code className="px-1">abstract</code>, <code className="px-1">doi</code>, <code className="px-1">journal_name</code>, <code className="px-1">journal_publisher</code>, <code className="px-1">conference</code>, <code className="px-1">keywords</code>, <code className="px-1">pdf_url</code>, <code className="px-1">primary_author_name</code>, <code className="px-1">primary_author_orcid</code>, <code className="px-1">co_authors</code>, <code className="px-1">funding_agency</code>, <code className="px-1">funding_amount</code>, etc.
+                  </p>
+                  {/* CSV file UPLOAD BUTTON */}
                   <label className="cursor-pointer inline-flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/30 hover:-translate-y-0.5">
                     Browse Files
                     <input 

@@ -34,7 +34,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
-  authorizeRoles('Administrator', 'Librarian'),
+  authorizeRoles('Administrator'),
   deleteAuthorHandler,
 );
 
